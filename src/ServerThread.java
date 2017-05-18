@@ -30,6 +30,8 @@ public class ServerThread extends Thread{
 
 
 
+    //Todo  
+
     // TODO: 17-05-2017 Criar Classe das Message para ver se determinado documento está assinado, etc.
     
     public void send(String msg, byte[] signature){
