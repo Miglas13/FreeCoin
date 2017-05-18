@@ -30,7 +30,14 @@ public class ServerThread extends Thread{
 
 
 
-    //Todo  
+    //Todo
+
+    //// TODO: 18/05/2017 Fred fica com as primeiras duas funcionalidades basicas 
+    //// TODO: 18/05/2017 Rui faz 4ª simples e 1ª avançada
+    //// TODO: 18/05/2017 Barbara 4ªavançada
+    //// TODO: 18/05/2017 André 5ªsimples e 3ªavançada
+
+    //// TODO: 18/05/2017  Guardar password é efetuada com o calculo do hash 1024 ou 2048 vezes + salt
 
     // TODO: 17-05-2017 Criar Classe das Message para ver se determinado documento está assinado, etc.
     
@@ -42,7 +49,7 @@ public class ServerThread extends Thread{
         String encripted= null;     // TODO: 17-05-2017 Acrescentar a classe do DeterministicDSA e fazer a chamada do encrypt - return encripted
     }
 
-    // TODO: 17-05-2017 Verificar Assinaturas 
+    // TODO: 17-05-2017 Verificar Assinaturas
     // TODO: 17-05-2017 Assinar e enviar 
     // TODO: 17-05-2017 Guardar transações SQL 
     // TODO: 17-05-2017 Criar moedas, tamos pobres 
