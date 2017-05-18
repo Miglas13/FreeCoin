@@ -7,6 +7,8 @@ import java.security.NoSuchAlgorithmException;
 public final class CHAP
 {
 
+    //o andre e lindo
+
     public static byte[] chapMD5(byte id, byte[] Password, byte[] Challenge) throws NoSuchAlgorithmException
     {
         MessageDigest md = MessageDigest.getInstance("MD5");
