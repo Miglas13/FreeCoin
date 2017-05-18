@@ -32,7 +32,7 @@ public class ServerThread extends Thread{
 
     //Todo
 
-    //// TODO: 18/05/2017 Fred fica com as primeiras duas funcionalidades basicas 
+    //// TODO: 18/05/2017 Fred fica com as primeiras duas funcionalidades basicas e curvas elipticas
     //// TODO: 18/05/2017 Rui faz 4ª simples e 1ª avançada
     //// TODO: 18/05/2017 Barbara 4ªavançada
     //// TODO: 18/05/2017 André 5ªsimples e 3ªavançada
