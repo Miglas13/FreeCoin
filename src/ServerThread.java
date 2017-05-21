@@ -3,14 +3,12 @@ import com.sun.xml.internal.ws.api.message.Message;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-import java.util.Vector;
+import java.util.*;
 
 public class ServerThread extends Thread{
 
@@ -68,7 +66,11 @@ public class ServerThread extends Thread{
     // TODO: 17-05-2017 Do lado do utilizador: 
     // TODO: 17-05-2017 Gerar chaves DSA
     // TODO: 17-05-2017 login 
-    // TODO: 17-05-2017 só sabe as suas transações 
+    // TODO: 17-05-2017 só sabe as suas transações
+
+    static String hextoBin(String s){
+        return new BigInteger(s,16).toString(2);
+    }
 
     public static String bitRandom(){
         Random rg = new Random();
@@ -76,15 +78,14 @@ public class ServerThread extends Thread{
         return Integer.toBinaryString(n);
     }
 
-    static String hextoBin(String s){
-        return new BigInteger(s,16).toString(2);
-    }
+    public void sendChallenge(){
 
+    }
 
     //return -1 caso não consiga vencer o challenge
     //return 1 caso consiga vencer o challenge
     // TODO: 20-05-2017 Substituir o return por uma nova coin dada ao user - Enviar mensagem para o utilizador especifico 
-    public int challenge() throws IOException {
+    public int challengeAnswer() throws IOException {
         int bytesRead;
         int current = 0;
         FileOutputStream fos = null;
@@ -154,7 +155,19 @@ public class ServerThread extends Thread{
         return 1;
     }
 
-    public static void main(String[] args) throws IOException{
-        bitNumber = bitRandom();
+    public static void main(String[] args) throws IOException {
+        ServerSocket socket = null;
+        try {
+            socket = new ServerSocket(SOCKET_PORT);
+            while (true) {
+                Socket connected = socket.accept();
+                System.out.println("Connecting...");
+                Timer timer = new Timer();
+                timer.schedule(new Challenge(connected),0,30000);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

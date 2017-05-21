@@ -1,22 +1,27 @@
 import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.sql.*;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 /**
  * Created by andremigueldasilvapinho on 16-05-2017.
  */
 public class Server {
+    public final static int SOCKET_PORT = 13267;
+    public final static String SERVER = "127.0.0.1";
+    static String bitNumber;
     public static void main(String[] args) throws IOException {
         List<ServerThread> connectedClients = new Vector<>();
         List<ServerThread> killList         = new Vector<>();
         List<ServerThread> serverActions    = new Vector<>();
-        int                portNumber       = 5555;
+        int                portNumber       = 1367;
         boolean            listening        = true;
-
         createDB(ServerThread.dbName);
         new Thread(() -> {
             try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
@@ -36,7 +41,6 @@ public class Server {
             }
         }).start();
     }
-
 
     public static void createDB(String dbLocation) {
         String sql = "CREATE TABLE IF NOT EXISTS user (" +
