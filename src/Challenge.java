@@ -1,8 +1,6 @@
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Random;
 import java.util.TimerTask;
 
 /**
@@ -16,8 +14,9 @@ public class Challenge extends TimerTask {
     }
 
     public void run(){
-        ServerThread.bitNumber = ServerThread.bitRandom();
-        byte[] message = ServerThread.bitNumber.getBytes();
+        Server.bitNumber = Server.bitRandom();
+        //Escreve isto apenas para teste. Deve ser removido no fim para Server.bitNumber.getBytes();
+        byte[] message = Integer.toBinaryString(10).getBytes();
         DataOutputStream dataOutputStream = null;
         try {
             dataOutputStream = new DataOutputStream(connected.getOutputStream());
