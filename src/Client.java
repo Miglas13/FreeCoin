@@ -13,16 +13,16 @@ public class Client {
 
     public static void solveChallenge(int binary, Socket socket){
         try {
-            File myFile = new File(FILE_TO_SEND);
-            byte[] mybytearray = new byte[(int)myFile.length()];
-            FileInputStream fileInputStream = new FileInputStream(myFile);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-            bufferedInputStream.read(mybytearray,0,mybytearray.length);
+            File file = new File(FILE_TO_SEND);
+            long length = file.length();
+            byte[] bytes = new byte[16*1024];
+            InputStream inputStream = new FileInputStream(file);
             OutputStream outputStream = socket.getOutputStream();
-            System.out.println("Sending " + FILE_TO_SEND + "(" + mybytearray.length + " bytes)");
-            outputStream.write(mybytearray,0,mybytearray.length);
-            outputStream.flush();
-            System.out.println("Done.");
+            int count;
+            while ((count = inputStream.read(bytes))>0){
+                outputStream.write(bytes,0,count);
+            }
+            System.out.println("File sent!");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -35,7 +35,6 @@ public class Client {
         try {
             socket = new Socket(SERVER,SOCKET_PORT);
             System.out.println("Connecting...");
-            while (true){
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                 int length = dataInputStream.readInt();
                 if (length>0) {
@@ -44,7 +43,6 @@ public class Client {
                     String s = new String(message,"US-ASCII");
                     System.out.println(s);
                     solveChallenge(Integer.parseInt(s),socket);
-                }
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
