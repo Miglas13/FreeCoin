@@ -20,15 +20,7 @@ public class Challenge extends TimerTask {
         DataOutputStream dataOutputStream = null;
         try {
             dataOutputStream = new DataOutputStream(connected.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             dataOutputStream.writeInt(message.length);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             dataOutputStream.write(message);
         } catch (IOException e) {
             e.printStackTrace();
