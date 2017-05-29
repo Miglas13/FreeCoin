@@ -139,7 +139,7 @@ public class Server{
             if (bos!=null)  bos.close();
             if (socket!=null)   socket.close();
         }
-        return 1;
+        return 1;       // TODO: 30-05-2017 Fred: adiciona 1 coin à BD 
     }
 
     public static void createDB(String dbLocation) {
