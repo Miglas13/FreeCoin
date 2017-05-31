@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class Server{
 
-    static final String dbName = "/home/andremigueldasilvapinho/frbased.db";
+    static final String dbName = "/home/frederico/frbased.db";
 
     public String serverRequest = "none";
     private Socket socket = null;

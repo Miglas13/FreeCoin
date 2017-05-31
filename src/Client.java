@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 /**
  * Created by andremigueldasilvapinho on 21-05-2017.
@@ -51,5 +52,29 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+        System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n\n");
+
+        Scanner sc = new Scanner(System.in);
+        int opt = sc.nextInt();
+
+        switch (opt) {
+            case 1:
+                System.out.println("Login:");
+                break;
+            case 2:
+                Registo();
+                break;
+        }
+
     }
+
+    public static void Registo(){
+
+
+
+
+    }
+
 }
