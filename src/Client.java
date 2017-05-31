@@ -77,7 +77,7 @@ public class Client {
         String nome = sc.nextLine();
 
         System.out.println("Insira uma password:\n");
-
+        //cenas
 
     }
 
