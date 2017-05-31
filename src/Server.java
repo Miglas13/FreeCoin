@@ -27,7 +27,7 @@ public class Server{
     private final List<Server> serverActions;
     public final static int SOCKET_PORT = 13267;
     public final static String SERVER = "127.0.0.1";  
-    public final static String FILE_TO_RECEIVED = "downloaded.txt";    // TODO: 20-05-2017  tem de se alterar isto para correr em windows também
+    public final static String FILE_TO_RECEIVED = "src/downloaded.txt";    // TODO: 20-05-2017  tem de se alterar isto para correr em windows também
 
     public final static int FILE_SIZE = 6022386;    // TODO: 20-05-2017 verificar se este tamanho está correcto
     public UUID serverThreadID;
@@ -95,36 +95,17 @@ public class Server{
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
         try{
-            byte[] mybytearray = new byte[FILE_SIZE];
             InputStream inputStream = socket.getInputStream();
-            fos = new FileOutputStream(FILE_TO_RECEIVED);
-            bos = new BufferedOutputStream(fos);
-            bytesRead = inputStream.read(mybytearray,0,mybytearray.length);
-            System.out.println("File");
-            current = bytesRead;
-            do {
-                System.out.println("TOPKEK");
-                System.out.println(current);
-                System.out.println(mybytearray.length);
-                bytesRead = inputStream.read(mybytearray,(mybytearray.length-current),current);
-                System.out.println("TOPKEK2");
-                if (bytesRead >= 0) current+=bytesRead;
-            }while (bytesRead>-1);
-            bytesRead = inputStream.read(mybytearray,0,mybytearray.length);
-            bos.write(mybytearray,0,mybytearray.length);
-            bos.flush();
-            System.out.println("File " + FILE_TO_RECEIVED + " downloaded (" + current + "bytes read)");
-
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            if (fos!=null)  fos.close();
-            if (bos!=null)  bos.close();
-            if (socket!=null)   socket.close();
-        }
-        try {
+            OutputStream outputStream = new FileOutputStream(FILE_TO_RECEIVED);
+            byte[] bytes = new byte[16*1024];
+            int count;
+            count = inputStream.read(bytes);
+            System.out.println("TOPKEK!");
+            System.out.println(count);
+            System.out.println(bytes.toString());
+            outputStream.write(bytes,0,count);
+            System.out.println("Received File!");
+            System.out.println("Checking");
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             FileInputStream fis = new FileInputStream(FILE_TO_RECEIVED);
             byte[] dataBytes = new byte[FILE_SIZE];
@@ -138,26 +119,27 @@ public class Server{
                 sb.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
             }
             String binary = hextoBin(sb.toString());
-            int flag = 0;
-            for (char x : binary.toCharArray()
-                 ) {
-                for (char y : bitNumber.toCharArray()
-                     ) {
-                    if (x == y) continue;
-                    else{
-                        flag = 1;
-                        break;
-                    }
-                }
-                if (flag==1) {
+            System.out.println(binary);
+            System.out.println(bitNumber);
+            for (int i=0; i < bitNumber.length(); i++){
+                if (bitNumber.charAt(i) == binary.charAt(i)){
+                    continue;
+                }else {
                     return -1;
                 }
-                else continue;
             }
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+        } finally {
+            if (fos!=null)  fos.close();
+            if (bos!=null)  bos.close();
+            if (socket!=null)   socket.close();
         }
-        return 1;
+        return 1;       // TODO: 30-05-2017 Fred: adiciona 1 coin à BD 
     }
 
     public static void createDB(String dbLocation) {
