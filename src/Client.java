@@ -72,7 +72,11 @@ public class Client {
 
     public static void Registo(){
 
+        System.out.println("Insira um nome para Login:\n");
+        Scanner sc = new Scanner(System.in);
+        String nome = sc.nextLine();
 
+        System.out.println("Insira uma password:\n");
 
 
     }
