@@ -1,15 +1,12 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.Scanner;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import static java.awt.SystemColor.menu;
 
 /**
  * Created by andremigueldasilvapinho on 21-05-2017.
@@ -104,9 +101,9 @@ public class Client {
         System.out.println("Insira uma password:\n");
         String pass = sc.nextLine();
 
-        String salt = "salt";
+        String pubkey = "";
 
-        String pubkey = "chave teste";
+        //hash da passe
 
         MessageDigest md = null;
         try {
@@ -124,6 +121,30 @@ public class Client {
 
         pass = String.format("%064x", new java.math.BigInteger(1, digest));
 
+        //gerar salt
+
+        String salt = "salt";
+
+        //gerar chaves
+
+
+        KeyPairGenerator keyGen = null;
+        try {
+            keyGen = KeyPairGenerator.getInstance("EC");
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            keyGen.initialize(256, random);
+            KeyPair pair = keyGen.generateKeyPair();
+            PrivateKey priv = pair.getPrivate();
+            PublicKey pub = pair.getPublic();
+            pubkey = pub.toString();
+            System.out.println(pub.toString());
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+
+        //inserir
         insert(nome, pass, salt, pubkey);
 
     }
