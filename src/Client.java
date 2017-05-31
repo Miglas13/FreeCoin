@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.*;
+import java.util.Base64;
 import java.util.Scanner;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,6 +17,7 @@ public class Client {
     public final static int SOCKET_PORT = 13267;
     public final static String SERVER = "127.0.0.1";
     public final static String FILE_TO_SEND = "src/text.txt";
+
 
     public static void solveChallenge(int binary, Socket socket){
         try {
@@ -103,29 +105,42 @@ public class Client {
 
         String pubkey = "";
 
-        //hash da passe
+        //gerar salt
 
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+        System.err.println(getNextSalt());
 
-        try {
-            md.update(pass.getBytes("UTF-8")); // Change this to "UTF-16" if needed
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        String sal = getNextSalt().toString();
+
+        //hash da passe - feito
+
+        String salepassword = pass+sal;
+
+        byte[] digest = null;
+
+        for (int i = 0; i < 2048; i++) {
+
+
+
+            MessageDigest md = null;
+            try {
+                md = MessageDigest.getInstance("SHA-256");
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                md.update(salepassword.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            digest = md.digest();
+            salepassword  = String.format("%064x", new java.math.BigInteger(1, digest));
+
         }
-        byte[] digest = md.digest();
 
         pass = String.format("%064x", new java.math.BigInteger(1, digest));
 
-        //gerar salt
-
-        String salt = "salt";
-
-        //gerar chaves
+        //gerar chaves - feito
 
 
         KeyPairGenerator keyGen = null;
@@ -143,11 +158,20 @@ public class Client {
             e.printStackTrace();
         }
 
-
-        //inserir
-        insert(nome, pass, salt, pubkey);
+        //inserir - feito
+        insert(nome, pass, sal, pubkey);
+        //passar estas variaveis para o servidor por streams e lá é feita a inserção
 
     }
+
+    public static byte[] getNextSalt() {
+        final SecureRandom myRandom = new SecureRandom();
+        byte[] salt = new byte[32];
+        myRandom.nextBytes(salt);
+        return salt;
+    }
+
+    //passar esta função para o servidor
 
     public static void insert(String name, String pass, String salt, String pub) {
         String sql = "INSERT INTO user(username,pass,salt,pubkey) VALUES(?,?,?,?)";
