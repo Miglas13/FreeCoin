@@ -160,7 +160,6 @@ public class Client {
 
         //inserir - feito
         insert(nome, pass, sal, pubkey);
-        //passar estas variaveis para o servidor por streams e lá é feita a inserção
 
     }
 
@@ -170,8 +169,6 @@ public class Client {
         myRandom.nextBytes(salt);
         return salt;
     }
-
-    //passar esta função para o servidor
 
     public static void insert(String name, String pass, String salt, String pub) {
         String sql = "INSERT INTO user(username,pass,salt,pubkey) VALUES(?,?,?,?)";
@@ -187,6 +184,10 @@ public class Client {
             System.out.println(e.getMessage());
         }
     }
+
+    //TODO passar os dados para o lado do servidor primeiro e depois então inserir na base de dados
+    //TODO guardar a chave privada gerada num ficheiro no computador pessoal
+    //TODO aranjar a geração do salt
 
 
 }
