@@ -149,6 +149,7 @@ public class Server{
                 ", pubkey       TEXT NOT NULL" +
                 ", coins INTEGER NOT NULL DEFAULT 0" +
                 ", pass TEXT NOT NULL" +    //representacao da pass (??? hash da pass + salt)
+                ", salt TEXT NOT NULL" +
                 ")";
 
         String sql1 = "CREATE TABLE IF NOT EXISTS transactions (" +

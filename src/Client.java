@@ -1,7 +1,15 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import static java.awt.SystemColor.menu;
 
 /**
  * Created by andremigueldasilvapinho on 21-05-2017.
@@ -31,6 +39,19 @@ public class Client {
         }
     }
 
+
+    private static Connection connect() {
+        // SQLite connection string
+        String url = "jdbc:sqlite:/home/frederico/frbased.db";
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return conn;
+    }
+
     public static void main(String[] args){
         Socket socket = null;
         try {
@@ -51,7 +72,13 @@ public class Client {
             e.printStackTrace();
         }
 
+        intro();
 
+
+    }
+
+
+    public static void intro(){
         System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n\n");
 
         Scanner sc = new Scanner(System.in);
@@ -75,8 +102,46 @@ public class Client {
         String nome = sc.nextLine();
 
         System.out.println("Insira uma password:\n");
-        //cenas
+        String pass = sc.nextLine();
+
+        String salt = "salt";
+
+        String pubkey = "chave teste";
+
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            md.update(pass.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        byte[] digest = md.digest();
+
+        pass = String.format("%064x", new java.math.BigInteger(1, digest));
+
+        insert(nome, pass, salt, pubkey);
 
     }
+
+    public static void insert(String name, String pass, String salt, String pub) {
+        String sql = "INSERT INTO user(username,pass,salt,pubkey) VALUES(?,?,?,?)";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            pstmt.setString(2, pass);
+            pstmt.setString(3, salt);
+            pstmt.setString(4, pub);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
 
 }
