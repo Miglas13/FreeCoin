@@ -38,6 +38,7 @@ public class Client {
         }
     }
 
+    /*
 
     private static Connection connect() {
         // SQLite connection string
@@ -50,6 +51,7 @@ public class Client {
         }
         return conn;
     }
+    */
 
     public static void main(String[] args){
         Socket socket = null;
@@ -142,6 +144,7 @@ public class Client {
 
         //gerar chaves - feito
 
+        PrivateKey priv=null;
 
         KeyPairGenerator keyGen = null;
         try {
@@ -149,7 +152,7 @@ public class Client {
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
             keyGen.initialize(256, random);
             KeyPair pair = keyGen.generateKeyPair();
-            PrivateKey priv = pair.getPrivate();
+            priv = pair.getPrivate();
             PublicKey pub = pair.getPublic();
             pubkey = pub.toString();
             System.out.println(pub.toString());
@@ -158,17 +161,40 @@ public class Client {
             e.printStackTrace();
         }
 
+        //guardar a chave no pc do user
+        String filename = nome+".pk";
+        try (PrintStream out = new PrintStream(new FileOutputStream(filename))) {
+            out.print(priv.toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         //inserir - feito
-        insert(nome, pass, sal, pubkey);
+
+        //insert(nome, pass, sal, pubkey);
+        Server.insert(nome, pass, sal, pubkey);
+
 
     }
 
     public static byte[] getNextSalt() {
-        final SecureRandom myRandom = new SecureRandom();
+
         byte[] salt = new byte[32];
-        myRandom.nextBytes(salt);
+
+        try {
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            random.nextBytes(salt);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
         return salt;
+
     }
+
+
+    /*
 
     public static void insert(String name, String pass, String salt, String pub) {
         String sql = "INSERT INTO user(username,pass,salt,pubkey) VALUES(?,?,?,?)";
@@ -183,10 +209,9 @@ public class Client {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-    }
+    }*/
 
-    //TODO passar os dados para o lado do servidor primeiro e depois então inserir na base de dados
-    //TODO guardar a chave privada gerada num ficheiro no computador pessoal
+
     //TODO aranjar a geração do salt
 
 

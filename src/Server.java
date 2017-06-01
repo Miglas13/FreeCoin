@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.UUID;
+import java.sql.PreparedStatement;
+
 
 public class Server{
 
@@ -171,6 +173,39 @@ public class Server{
         }
     }
 
+
+
+    private static Connection connect() {
+        // SQLite connection string
+        String url = "jdbc:sqlite:/home/frederico/frbased.db";
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return conn;
+    }
+
+
+
+    public static void insert(String name, String pass, String salt, String pub) {
+        String sql = "INSERT INTO user(username,pass,salt,pubkey) VALUES(?,?,?,?)";
+
+        try (Connection conn = connect()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, name);
+                pstmt.setString(2, pass);
+                pstmt.setString(3, salt);
+                pstmt.setString(4, pub);
+                pstmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
     public static void main(String[] args) throws IOException {
         createDB(Server.dbName);
         ServerSocket socket = null;
@@ -187,5 +222,9 @@ public class Server{
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+
+
     }
 }
