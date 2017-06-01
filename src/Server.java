@@ -5,10 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -75,21 +72,42 @@ public class Server{
         return new BigInteger(s,16).toString(2);
     }
 
-    public static String bitRandom(){
-        Random rg = new Random();
-        int n = rg.nextInt(10);
-        System.out.println(n);
-        return Integer.toBinaryString(n);
+    private static Connection connect() {
+        // SQLite connection string
+        String url = "jdbc:sqlite:src/frbased.db";
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return conn;
     }
 
-    public void sendChallenge(){
+    public static int numUtilizadores(){
+        String sql = "Select count(*) from user";
+        Connection connection = connect();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            return rs.getInt(0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 
+    public static String bitRandom(int x){
+        Random rg = new Random();
+        int n = rg.nextInt(x);
+        System.out.println(n);
+        return Integer.toBinaryString(n);
     }
 
     //return -1 caso não consiga vencer o challenge
     //return 1 caso consiga vencer o challenge
     // TODO: 20-05-2017 Substituir o return por uma nova coin dada ao user - Enviar mensagem para o utilizador especifico 
-    public static int challengeAnswer(Socket socket) throws IOException {
+    public static void challengeAnswer(Socket socket) throws IOException {
         int bytesRead;
         int current = 0;
         FileOutputStream fos = null;
@@ -125,9 +143,11 @@ public class Server{
                 if (bitNumber.charAt(i) == binary.charAt(i)){
                     continue;
                 }else {
-                    return -1;
+                    outputStream.write("Falhou o challenge.".getBytes());
+                    return;
                 }
             }
+            outputStream.write("Solved".getBytes());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -139,7 +159,6 @@ public class Server{
             if (bos!=null)  bos.close();
             if (socket!=null)   socket.close();
         }
-        return 1;       // TODO: 30-05-2017 Fred: adiciona 1 coin à BD 
     }
 
     public static void createDB(String dbLocation) {
@@ -150,6 +169,7 @@ public class Server{
                 ", coins INTEGER NOT NULL DEFAULT 0" +
                 ", pass TEXT NOT NULL" +    //representacao da pass (??? hash da pass + salt)
                 ", salt TEXT NOT NULL" +
+                ", freecoins    INTEGER NOT NULL" +
                 ")";
 
         String sql1 = "CREATE TABLE IF NOT EXISTS transactions (" +
@@ -180,9 +200,8 @@ public class Server{
                 Socket connected = socket.accept();
                 System.out.println("Connecting...");
                 Timer timer = new Timer();
-                timer.schedule(new Challenge(connected),0,999999999);       //Increasing for testing. Final Version needs to be rescaled to 30000
-                int i = challengeAnswer(connected);
-                System.out.println(i);
+                timer.schedule(new Challenge(connected),0,30000);       //Increasing for testing. Final Version needs to be rescaled to 30000
+                challengeAnswer(connected);
             }
         } catch (Exception e) {
             e.printStackTrace();
