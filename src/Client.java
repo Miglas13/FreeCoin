@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Base64;
 import java.util.Scanner;
@@ -15,6 +17,7 @@ import java.sql.SQLException;
 
 public class Client {
     public final static int SOCKET_PORT = 13267;
+    public final static int SOCKET_PORT_BRPOADCAST = 13268;
     public final static String SERVER = "127.0.0.1";
     public final static String FILE_TO_SEND = "src/text.txt";
     public static String nome = null;
@@ -32,9 +35,10 @@ public class Client {
             }
             System.out.println("File sent!");
             byte[] bytes1 = new byte[10];
-            inputStream.read(bytes1);
-            String s = bytes1.toString();
-            if (s.equals("Solved")){
+            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+            int number = dataInputStream.readInt();
+            if (number == 1){
+                System.out.println("Boa! Conseguiste uma coin!");
                 String sql = "UPDATE user" +
                         "SET freecoin = " +
                         "(SELECT freecoin FROM user WHERE nome = " +
@@ -82,10 +86,10 @@ public class Client {
     }
 
     public static void main(String[] args){
-        intro();
+        //intro();
         Socket socket = null;
         try {
-            socket = new Socket(SERVER,SOCKET_PORT);
+            socket = new Socket(SERVER,SOCKET_PORT_BRPOADCAST);
             System.out.println("Connecting...");
             System.out.println("Fazer challenge? y/n");
             Scanner scanner = new Scanner(System.in);
