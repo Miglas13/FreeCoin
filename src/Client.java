@@ -20,7 +20,7 @@ public class Client {
     public final static int SOCKET_PORT_BRPOADCAST = 13268;
     public final static String SERVER = "127.0.0.1";
     public final static String FILE_TO_SEND = "src/text.txt"; // TODO: 01-06-2017 Mudar para o utilizador enviar o path para o ficheiro que quer enviar 
-    public static String nome = null;
+    public static String nome = "fred";
 
     public static void solveChallenge(int binary, Socket socket){
         try {
@@ -40,10 +40,10 @@ public class Client {
             if (number == 1){
                 System.out.println("Boa! Conseguiste uma coin!");
                 String sql = "UPDATE user" +
-                        "SET freecoin = " +
-                        "(SELECT freecoin FROM user WHERE nome = " +
+                        "SET coins = " +
+                        "(SELECT coins FROM user WHERE username = " +
                         nome + ")" +
-                        " + 1";
+                        " + 1"; //falta corrigir o erro de sintaxe do sql
                 Server.updatebd(sql);
                 // TODO: 01-06-2017 Enviar sql para o Server e inserir na BD
             }
@@ -53,21 +53,6 @@ public class Client {
             e.printStackTrace();
         }
     }
-
-    /*
-
-    private static Connection connect() {
-        // SQLite connection string
-        String url = "jdbc:sqlite:/home/frederico/frbased.db";
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return conn;
-    }
-    */
 
     private static void challenge(Socket socket){
         DataInputStream dataInputStream = null;
@@ -119,7 +104,7 @@ public class Client {
 
         switch (opt) {
             case 1:
-                System.out.println("Login:");
+                Login();
                 break;
             case 2:
                 Registo();
@@ -154,28 +139,22 @@ public class Client {
 
         byte[] digest = null;
 
-        for (int i = 0; i < 2048; i++) {
+        //for (int i = 0; i < 2048; i++) {
+        //removeu-se o 2048 para funcionar com o chap
 
-
-
-            MessageDigest md = null;
-            try {
-                md = MessageDigest.getInstance("SHA-256");
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                md.update(salepassword.getBytes("UTF-8")); // Change this to "UTF-16" if needed
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            digest = md.digest();
-            salepassword  = String.format("%064x", new java.math.BigInteger(1, digest));
-
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
-
-        pass = String.format("%064x", new java.math.BigInteger(1, digest));
+         try {
+            md.update(salepassword.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        digest = md.digest();
+        pass  = String.format("%064x", new java.math.BigInteger(1, digest));
 
         //gerar chaves - feito
 
@@ -229,6 +208,11 @@ public class Client {
     }
 
 
+    public static void Login(){
+
+
+    }
+
     /*
 
     public static void insert(String name, String pass, String salt, String pub) {
@@ -247,7 +231,7 @@ public class Client {
     }*/
 
 
-    //TODO aranjar a geração do salt
+    //TODO corrigir o erro de sintaxe do sql, ainda nao consegui
 
 
 }

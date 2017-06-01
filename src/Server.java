@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 
 public class Server{
 
-    static final String dbName = "/home/frederico/frbased.db";
+    static final String dbName = "/home/frederico/IdeaProjects/FreeCoin/src/frbased.db";
 
     public String serverRequest = "none";
     private Socket socket = null;
@@ -25,7 +25,7 @@ public class Server{
     private final List<Server> killList;
     private final List<Server> serverActions;
     public final static int SOCKET_PORT = 13267;
-    public final static int SOCKET_PORT_BROADCAST = 13270;
+    public final static int SOCKET_PORT_BROADCAST = 13268;
     public final static String SERVER = "127.0.0.1";  
     public final static String FILE_TO_RECEIVED = "src/downloaded.txt";    // TODO: 20-05-2017  tem de se alterar isto para correr em windows também
 
@@ -174,7 +174,6 @@ public class Server{
                 ", coins INTEGER NOT NULL DEFAULT 0" +
                 ", pass TEXT NOT NULL" +    //representacao da pass (??? hash da pass + salt)
                 ", salt TEXT NOT NULL" +
-                ", freecoins    INTEGER NOT NULL" +
                 ")";
 
         String sql1 = "CREATE TABLE IF NOT EXISTS transactions (" +
