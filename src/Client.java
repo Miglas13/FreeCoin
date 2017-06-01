@@ -44,6 +44,7 @@ public class Client {
                         "(SELECT freecoin FROM user WHERE nome = " +
                         nome + ")" +
                         " + 1";
+                Server.updatebd(sql);
                 // TODO: 01-06-2017 Enviar sql para o Server e inserir na BD
             }
         } catch (FileNotFoundException e) {
@@ -86,7 +87,13 @@ public class Client {
     }
 
     public static void main(String[] args){
-        //intro();
+        intro();
+
+    }
+
+
+    public static void challenge(){
+
         Socket socket = null;
         try {
             socket = new Socket(SERVER,SOCKET_PORT_BRPOADCAST);
@@ -104,9 +111,8 @@ public class Client {
         }
     }
 
-
     public static void intro(){
-        System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n\n");
+        System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n3 - Challenge:");
 
         Scanner sc = new Scanner(System.in);
         int opt = sc.nextInt();
@@ -117,6 +123,9 @@ public class Client {
                 break;
             case 2:
                 Registo();
+                break;
+            case 3:
+                challenge();
                 break;
         }
 
@@ -181,7 +190,7 @@ public class Client {
             priv = pair.getPrivate();
             PublicKey pub = pair.getPublic();
             pubkey = pub.toString();
-            System.out.println(pub.toString());
+            //System.out.println(pub.toString());
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

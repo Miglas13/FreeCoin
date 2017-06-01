@@ -146,13 +146,11 @@ public class Server{
                 if (bitNumber.charAt(i) == binary.charAt(i)){
                     continue;
                 }else {
-                    DataOutputStream dataOutputStream = new DataOutputStream( socket.getOutputStream());
-                    dataOutputStream.writeInt(-1);
+                    outputStream.write("Falhou o challenge.".getBytes());
                     return;
                 }
             }
-            DataOutputStream dataOutputStream = new DataOutputStream( socket.getOutputStream());
-            dataOutputStream.writeInt(1);
+            outputStream.write("Solved".getBytes());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -215,11 +213,21 @@ public class Server{
     }
 
 
+    public static void updatebd(String sql){
+        try (Connection conn = connect()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         createDB(Server.dbName);
         ServerSocket socket = null;
         try {
-            socket = new ServerSocket(SOCKET_PORT_BROADCAST);
+            socket = new ServerSocket(SOCKET_PORT_BROADCAST );
             while (true) {
                 Socket connected = socket.accept();
                 System.out.println("Connecting...");
