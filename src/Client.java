@@ -17,7 +17,7 @@ public class Client {
     public final static int SOCKET_PORT = 13267;
     public final static String SERVER = "127.0.0.1";
     public final static String FILE_TO_SEND = "src/text.txt";
-
+    public static String nome = null;
 
     public static void solveChallenge(int binary, Socket socket){
         try {
@@ -31,6 +31,17 @@ public class Client {
                 outputStream.write(bytes,0,count);
             }
             System.out.println("File sent!");
+            byte[] bytes1 = new byte[10];
+            inputStream.read(bytes1);
+            String s = bytes1.toString();
+            if (s.equals("Solved")){
+                String sql = "UPDATE user" +
+                        "SET freecoin = " +
+                        "(SELECT freecoin FROM user WHERE nome = " +
+                        nome + ")" +
+                        " + 1";
+                // TODO: 01-06-2017 Enviar sql para o Server e inserir na BD
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -53,29 +64,40 @@ public class Client {
     }
     */
 
+    private static void challenge(Socket socket){
+        DataInputStream dataInputStream = null;
+        try {
+            dataInputStream = new DataInputStream(socket.getInputStream());
+            int length = dataInputStream.readInt();
+            if (length>0) {
+                byte[] message = new byte[length];
+                dataInputStream.readFully(message, 0, message.length);
+                String s = new String(message,"US-ASCII");
+                System.out.println(s);
+                solveChallenge(Integer.parseInt(s),socket);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args){
+        intro();
         Socket socket = null;
         try {
             socket = new Socket(SERVER,SOCKET_PORT);
             System.out.println("Connecting...");
-                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                int length = dataInputStream.readInt();
-                if (length>0) {
-                    byte[] message = new byte[length];
-                    dataInputStream.readFully(message, 0, message.length);
-                    String s = new String(message,"US-ASCII");
-                    System.out.println(s);
-                    solveChallenge(Integer.parseInt(s),socket);
+            System.out.println("Fazer challenge? y/n");
+            Scanner scanner = new Scanner(System.in);
+            String s = scanner.nextLine();
+            if (s.equals("y")){
+                challenge(socket);
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        intro();
-
-
     }
 
 
@@ -100,7 +122,7 @@ public class Client {
 
         System.out.println("Insira um nome para Login:\n");
         Scanner sc = new Scanner(System.in);
-        String nome = sc.nextLine();
+        nome = sc.nextLine();
 
         System.out.println("Insira uma password:\n");
         String pass = sc.nextLine();
