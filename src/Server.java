@@ -244,4 +244,30 @@ public class Server{
 
 
     }
+
+    public static String getHash(String pessoa){
+
+        String sql = "SELECT pass FROM user where username = ? ;";
+
+        String hash="";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setString(1,pessoa);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            // loop through the result set
+            while (rs.next()) {
+                hash = rs.getString("pass");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return hash;
+
+    }
+
 }

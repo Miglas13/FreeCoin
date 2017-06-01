@@ -11,9 +11,9 @@ public final class CHAP
 
     //o andre e lindo
 
-    public static byte[] chapMD5(byte id, byte[] Password, byte[] Challenge) throws NoSuchAlgorithmException
+    public static byte[] chapSHA256(byte id, byte[] Password, byte[] Challenge) throws NoSuchAlgorithmException
     {
-        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(id);
         md.update(Password, 0, Password.length);
         md.update(Challenge, 0, Challenge.length);
@@ -24,7 +24,7 @@ public final class CHAP
     {
         byte[] Response = new byte[17];
         Response[0] = id;
-        System.arraycopy(chapMD5(id, Password, Challenge), 0, Response, 1, 16);
+        System.arraycopy(chapSHA256(id, Password, Challenge), 0, Response, 1, 16);
         return Response;
     }
 }

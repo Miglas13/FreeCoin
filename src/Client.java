@@ -210,26 +210,29 @@ public class Client {
 
     public static void Login(){
 
+        System.out.println("Insira o username:");
+        Scanner sc = new Scanner(System.in);
+        String username = sc.nextLine();
+
+        System.out.println("Insira a password:");
+        String pw = sc.nextLine();
+
+        String chall = Server.getHash(username);
+        System.out.println("Produto do valor de hash da concatenação da pass com o salt do user " + username + " é " +chall);
+
+        byte[] p = pw.getBytes();
+        byte[] c = chall.getBytes();
+        byte[] chap = null;
+
+        try {
+            chap = CHAP.chapSHA256((byte) 0,p,c);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        System.err.println(chap);
 
     }
-
-    /*
-
-    public static void insert(String name, String pass, String salt, String pub) {
-        String sql = "INSERT INTO user(username,pass,salt,pubkey) VALUES(?,?,?,?)";
-
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, pass);
-            pstmt.setString(3, salt);
-            pstmt.setString(4, pub);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }*/
-
 
     //TODO corrigir o erro de sintaxe do sql, ainda nao consegui
 
