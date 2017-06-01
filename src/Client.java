@@ -20,7 +20,7 @@ public class Client {
     public final static int SOCKET_PORT_BRPOADCAST = 13268;
     public final static String SERVER = "127.0.0.1";
     public final static String FILE_TO_SEND = "src/text.txt"; // TODO: 01-06-2017 Mudar para o utilizador enviar o path para o ficheiro que quer enviar 
-    public static String nome = "fred";
+    public static String nome = null;
 
     public static void solveChallenge(int binary, Socket socket){
         try {
@@ -217,30 +217,69 @@ public class Client {
         System.out.println("Insira a password:");
         String pw = sc.nextLine();
 
-        String chall = Server.getHash(username);
-        System.out.println("Produto do valor de hash da concatenação da pass com o salt do user " + username + " é " +chall);
+        //gerar um Id e um "nounce"
 
-        byte[] p = pw.getBytes();
-        byte[] c = chall.getBytes();
-        byte[] chap = null;
+        byte[] nounce = Server.getNounce();
+        int id = Server.getId();
 
+        System.out.println("Nounce = "+nounce+"\nid = " +id);
+
+        String salpassword = pw+Server.getSalt(username);
+        System.err.println("Sal e password = " + salpassword);
+
+
+        byte[] digest = null;
+        String firstHash="";
+
+        //calcular o hash da password com o sal do utilizador a querer autenticar
+
+        MessageDigest md = null;
         try {
-            chap = CHAP.chapSHA256((byte) 0,p,c);
+            md = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+        try {
+            md.update(salpassword.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        digest = md.digest();
+        firstHash = String.format("%064x", new java.math.BigInteger(1, digest));
 
-        System.err.println(chap);
+        String toBeHashed = id+nounce.toString()+firstHash;
+        System.out.println("(concatenação id | nounce | (hash pass | salt)) = " + toBeHashed);
 
-        byte[] resposta = null;
+        //calcular o valor de hash final para ser verificado no lado do servidor
+
+        String lastHash="";
 
         try {
-            resposta = CHAP.chapResponse((byte) 0,p,c);
+            md = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+        try {
+            md.update(toBeHashed.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        digest = md.digest();
+        lastHash = String.format("%064x", new java.math.BigInteger(1, digest));
 
-        System.out.println(resposta);
+        System.out.println("Hash enviado para o servidor = " + lastHash + "\n\n\n");
+
+        //verificar se são iguais
+
+        int verify = Server.VerifyAuth(id, nounce, username, pw, lastHash);
+        if(verify == 1){
+            nome = username;
+            System.out.println("Utilizador autenticado com sucesso!\nBem-vindo(a) " + username);
+        }
+        else{
+            System.err.println("Autenticação sem sucesso!\n");
+            intro();
+        }
 
     }
 
