@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 
 public class Server{
 
-    static final String dbName = "src/frbased.db";
+    static final String dbName = "/home/frederico/frbased.db";
 
     public String serverRequest = "none";
     private Socket socket = null;
@@ -25,7 +25,7 @@ public class Server{
     private final List<Server> killList;
     private final List<Server> serverActions;
     public final static int SOCKET_PORT = 13267;
-    public final static int SOCKET_PORT_BROADCAST = 13268;
+    public final static int SOCKET_PORT_BROADCAST = 13270;
     public final static String SERVER = "127.0.0.1";  
     public final static String FILE_TO_RECEIVED = "src/downloaded.txt";    // TODO: 20-05-2017  tem de se alterar isto para correr em windows também
 
@@ -77,7 +77,7 @@ public class Server{
 
     private static Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:~/IdeoProjects/FreeCoin/src/frbased.db";
+        String url = "jdbc:sqlite:src/frbased.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -88,12 +88,12 @@ public class Server{
     }
 
     public static int numUtilizadores(){
-        String sql = "Select count(*) as total from user";
+        String sql = "Select count(*) from user";
         Connection connection = connect();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
-            return rs.getInt("total");
+            return rs.getInt(0);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -171,6 +171,7 @@ public class Server{
                 "id INTEGER     PRIMARY KEY AUTOINCREMENT" +
                 ", username     TEXT NOT NULL UNIQUE" +
                 ", pubkey       TEXT NOT NULL" +
+                ", coins INTEGER NOT NULL DEFAULT 0" +
                 ", pass TEXT NOT NULL" +    //representacao da pass (??? hash da pass + salt)
                 ", salt TEXT NOT NULL" +
                 ", freecoins    INTEGER NOT NULL" +
@@ -184,7 +185,7 @@ public class Server{
                 ")";
 
         try (
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:frbased.db");
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbLocation);
                 Statement statement = connection.createStatement();
         ) {
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
