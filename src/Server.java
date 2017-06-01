@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.*;
 import java.util.List;
 import java.util.Random;
@@ -245,6 +246,39 @@ public class Server{
 
     }
 
+
+    public static byte[] getNounce(){
+
+        byte[] nounce = new byte[16];
+
+        try {
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            random.nextBytes(nounce);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return nounce;
+
+    }
+
+    public static int getId(){
+
+        int id = 0;
+
+        try {
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            id = random.nextInt();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return id;
+
+    }
+
     public static String getHash(String pessoa){
 
         String sql = "SELECT pass FROM user where username = ? ;";
@@ -269,5 +303,64 @@ public class Server{
         return hash;
 
     }
+
+    public static String getSalt(String pessoa){
+
+        String sql = "SELECT salt FROM user where username = ? ;";
+
+        String hash="";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setString(1,pessoa);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            // loop through the result set
+            while (rs.next()) {
+                hash = rs.getString("salt");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return hash;
+
+    }
+
+    public static int VerifyAuth(int id, byte[] nounce, String username, String pw, String lastHash){
+
+        String HashedPassword = getHash(username);
+
+        String toBeHashed = id + nounce.toString() + HashedPassword;
+
+        String HashToVerify = "";
+        byte[] digest = null;
+        MessageDigest md = null;
+
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        try {
+            md.update(toBeHashed.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        digest = md.digest();
+        HashToVerify = String.format("%064x", new java.math.BigInteger(1, digest));
+
+        System.err.println("Hash calculado do lado do servidor = " + HashToVerify);
+
+        if(HashToVerify.equals(lastHash)){
+            return 1;
+        }
+        else
+            return 0;
+    }
+
+
 
 }
