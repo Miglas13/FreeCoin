@@ -25,6 +25,7 @@ public class Server{
     private final List<Server> killList;
     private final List<Server> serverActions;
     public final static int SOCKET_PORT = 13267;
+    public final static int SOCKET_PORT_BROADCAST = 13268;
     public final static String SERVER = "127.0.0.1";  
     public final static String FILE_TO_RECEIVED = "src/downloaded.txt";    // TODO: 20-05-2017  tem de se alterar isto para correr em windows também
 
@@ -195,20 +196,6 @@ public class Server{
 
 
 
-    private static Connection connect() {
-        // SQLite connection string
-        String url = "jdbc:sqlite:/home/frederico/frbased.db";
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return conn;
-    }
-
-
-
     public static void insert(String name, String pass, String salt, String pub) {
         String sql = "INSERT INTO user(username,pass,salt,pubkey) VALUES(?,?,?,?)";
 
@@ -230,7 +217,7 @@ public class Server{
         createDB(Server.dbName);
         ServerSocket socket = null;
         try {
-            socket = new ServerSocket(SOCKET_PORT);
+            socket = new ServerSocket(SOCKET_PORT_BROADCAST );
             while (true) {
                 Socket connected = socket.accept();
                 System.out.println("Connecting...");
