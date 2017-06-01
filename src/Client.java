@@ -232,6 +232,16 @@ public class Client {
 
         System.err.println(chap);
 
+        byte[] resposta = null;
+
+        try {
+            resposta = CHAP.chapResponse((byte) 0,p,c);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(resposta);
+
     }
 
     //TODO corrigir o erro de sintaxe do sql, ainda nao consegui
