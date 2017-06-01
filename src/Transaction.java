@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.Socket;
 import java.security.*;
 import java.util.Scanner;
 
@@ -8,7 +9,9 @@ import java.util.Scanner;
 public class Transaction {
 
 
-    public void sign(File out, File pk, File sign){
+    Socket socket= null;
+
+    public static void sign(File out, File pk, File sign){
 
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -49,7 +52,7 @@ public class Transaction {
     }
 
 
-    public static  void main (String argv[]){
+    public static  void main (String argv[]) throws IOException {
 
         String destinatario = "";
         int montante=0;
@@ -73,20 +76,24 @@ public class Transaction {
 
         //passar os dados para o ficheiro
 
+
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter((scanner.next())+".txt"));
             out.write(PK + "\n");
             out.write(montante + "\n");
             out.write(PKD);
-            out.close();
+            //Assinar o ficheiro e enviar para o servidor
+            sign(out, PKI,Sign);
+
+
+
+
         }
         catch (IOException e){
             System.out.println("Exception ");
 
         }
 
-
-        //Assinar o ficheiro e enviar para o servidor
 
 
 
