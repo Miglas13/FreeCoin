@@ -19,7 +19,7 @@ public class Client {
     public final static int SOCKET_PORT = 13267;
     public final static int SOCKET_PORT_BRPOADCAST = 13268;
     public final static String SERVER = "127.0.0.1";
-    public final static String FILE_TO_SEND = "src/text.txt";
+    public final static String FILE_TO_SEND = "src/text.txt"; // TODO: 01-06-2017 Mudar para o utilizador enviar o path para o ficheiro que quer enviar 
     public static String nome = null;
 
     public static void solveChallenge(int binary, Socket socket){
