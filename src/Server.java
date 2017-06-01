@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 
 public class Server{
 
-    static final String dbName = "/home/frederico/frbased.db";
+    static final String dbName = "src/frbased.db";
 
     public String serverRequest = "none";
     private Socket socket = null;
@@ -77,7 +77,7 @@ public class Server{
 
     private static Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:src/frbased.db";
+        String url = "jdbc:sqlite:~/IdeoProjects/FreeCoin/src/frbased.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -88,12 +88,12 @@ public class Server{
     }
 
     public static int numUtilizadores(){
-        String sql = "Select count(*) from user";
+        String sql = "Select count(*) as total from user";
         Connection connection = connect();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
-            return rs.getInt(0);
+            return rs.getInt("total");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -171,7 +171,6 @@ public class Server{
                 "id INTEGER     PRIMARY KEY AUTOINCREMENT" +
                 ", username     TEXT NOT NULL UNIQUE" +
                 ", pubkey       TEXT NOT NULL" +
-                ", coins INTEGER NOT NULL DEFAULT 0" +
                 ", pass TEXT NOT NULL" +    //representacao da pass (??? hash da pass + salt)
                 ", salt TEXT NOT NULL" +
                 ", freecoins    INTEGER NOT NULL" +
@@ -185,7 +184,7 @@ public class Server{
                 ")";
 
         try (
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbLocation);
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:frbased.db");
                 Statement statement = connection.createStatement();
         ) {
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
