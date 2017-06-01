@@ -146,11 +146,13 @@ public class Server{
                 if (bitNumber.charAt(i) == binary.charAt(i)){
                     continue;
                 }else {
-                    outputStream.write("Falhou o challenge.".getBytes());
+                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                    dataOutputStream.writeInt(-1);
                     return;
                 }
             }
-            outputStream.write("Solved".getBytes());
+            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            dataOutputStream.writeInt(1);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {

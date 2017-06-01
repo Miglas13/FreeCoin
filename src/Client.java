@@ -41,7 +41,7 @@ public class Client {
                 System.out.println("Boa! Conseguiste uma coin!");
                 String sql = "UPDATE user" +
                         "SET freecoin = " +
-                        "(SELECT freecoin FROM user WHERE nome = " +
+                        "(SELECT freecoin FROM user WHERE username = " +
                         nome + ")" +
                         " + 1";
                 Server.updatebd(sql);
@@ -93,7 +93,6 @@ public class Client {
 
 
     public static void challenge(){
-
         Socket socket = null;
         try {
             socket = new Socket(SERVER,SOCKET_PORT_BRPOADCAST);
@@ -112,7 +111,7 @@ public class Client {
     }
 
     public static void intro(){
-        System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n3 - Challenge:");
+        System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n3 - Challenge:"); // TODO: 01-06-2017 tem de ser depois do login
 
         Scanner sc = new Scanner(System.in);
         int opt = sc.nextInt();
