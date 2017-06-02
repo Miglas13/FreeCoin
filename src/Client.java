@@ -219,6 +219,7 @@ public class Client {
                 //Assinar o ficheiro e enviar para o servidor
 
                 sign(file,secretKey,filename);
+                Server.verifyTransaction(user+destinatario+".sign");
 
 
             }
