@@ -19,12 +19,14 @@ public class Client {
     public final static int SOCKET_PORT = 13267;
     public final static int SOCKET_PORT_BRPOADCAST = 13268;
     public final static String SERVER = "127.0.0.1";
-    public final static String FILE_TO_SEND = "src/text.txt"; // TODO: 01-06-2017 Mudar para o utilizador enviar o path para o ficheiro que quer enviar 
     public static String nome = null;
 
     public static void solveChallenge(int binary, Socket socket){
         try {
-            File file = new File(FILE_TO_SEND);
+            System.out.println("Ficheiro a enviar (PATH):");
+            Scanner scanner = new Scanner(System.in);
+            String file_to_send = scanner.nextLine();
+            File file = new File(file_to_send);
             long length = file.length();
             byte[] bytes = new byte[16*1024];
             InputStream inputStream = new FileInputStream(file);
@@ -64,7 +66,12 @@ public class Client {
                 dataInputStream.readFully(message, 0, message.length);
                 String s = new String(message,"US-ASCII");
                 System.out.println(s);
-                solveChallenge(Integer.parseInt(s),socket);
+                System.out.println("Deseja resolver o challenge [y/n]?");
+                Scanner scanner = new Scanner(System.in);
+                String s = scanner.nextLine();
+                if(s.equals("y")){
+                    solveChallenge(Integer.parseInt(s),socket);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
