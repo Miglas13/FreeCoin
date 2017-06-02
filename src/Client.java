@@ -72,9 +72,9 @@ public class Client {
                 System.out.println(s);
                 System.out.println("Deseja resolver o challenge [y/n]?");
                 Scanner scanner = new Scanner(System.in);
-                String s = scanner.nextLine();
-                if(s.equals("y")){
-                    solveChallenge(Integer.parseInt(s),socket);
+                String a = scanner.nextLine();
+                if(a.equals("y")){
+                    solveChallenge(Integer.parseInt(a),socket);
                 }
             }
         } catch (IOException e) {
