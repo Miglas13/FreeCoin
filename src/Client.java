@@ -123,7 +123,7 @@ public class Client {
     }
 
     public static void intro(){
-        System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n3 - Challenge:");
+        System.out.println("Bem-vindo à aplicação, o que deseja fazer?\n\n1 - Login:\n2 - Registo:\n");
 
         Scanner sc = new Scanner(System.in);
         int opt = sc.nextInt();
@@ -134,9 +134,6 @@ public class Client {
                 break;
             case 2:
                 Registo();
-                break;
-            case 3:
-                challenge();
                 break;
         }
 
@@ -301,6 +298,7 @@ public class Client {
         if(verify == 1){
             nome = username;
             System.out.println("Utilizador autenticado com sucesso!\nBem-vindo(a) " + username);
+            challenge();
         }
         else{
             System.err.println("Autenticação sem sucesso!\n");
