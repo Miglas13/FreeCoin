@@ -1,6 +1,9 @@
+import sun.misc.BASE64Decoder;
+
 import java.io.*;
 import java.net.Socket;
 import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Scanner;
 
 /**
@@ -9,19 +12,47 @@ import java.util.Scanner;
 public class Transaction {
 
 
-    public static void sign(File out, String pk, File sign){
+    public static PrivateKey stringToPrivateKey(String s) {
+
+        BASE64Decoder decoder = new BASE64Decoder();
+        byte[] c = null;
+        KeyFactory keyFact = null;
+        PrivateKey returnKey = null;
 
         try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-            keyGen.initialize(256, random);
-            KeyPair pair = keyGen.generateKeyPair();
-            PrivateKey priv = pair.getPrivate();
-            PublicKey pub = pair.getPublic();
+
+            c = decoder.decodeBuffer(s);
+            keyFact = KeyFactory.getInstance("DSA", "SUN");
+        } catch (Exception e) {
+
+            System.out.println("Error in first try catch of stringToPrivateKey");
+            e.printStackTrace();
+        }
+
+
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(c);
+        try {   //the next line causes the crash
+            returnKey = keyFact.generatePrivate(x509KeySpec);
+        } catch (Exception e) {
+
+            System.out.println("Error in stringToPrivateKey");
+            e.printStackTrace();
+        }
+
+        return returnKey;
+
+    }
+
+
+    public static FileOutputStream sign(FileInputStream out, String pk, File sign) throws FileNotFoundException {
+
+        FileOutputStream sigfos = new FileOutputStream(sign);
+        try {
+
+            PrivateKey priv = stringToPrivateKey(pk);
             Signature dsa = Signature.getInstance("SHA1withECDSA");
             dsa.initSign(priv);
-            FileInputStream fis = new FileInputStream(out);
-            BufferedInputStream bufin = new BufferedInputStream(fis);
+            BufferedInputStream bufin = new BufferedInputStream(out);
             byte[] buffer = new byte[1024];
             int len;
             while ((len = bufin.read(buffer)) >= 0) {
@@ -32,19 +63,15 @@ public class Transaction {
             byte[] realSig = dsa.sign();
 
             // Save signature
-            FileOutputStream sigfos = new FileOutputStream(sign);
             sigfos.write(realSig);
             sigfos.close();
+            return  sigfos;
 
-            // Save public key
-            byte[] key = pub.getEncoded();
-            FileOutputStream keyfos = new FileOutputStream(pk);
-            keyfos.write(key);
-            keyfos.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        return sigfos;
 
 
     }
@@ -57,22 +84,22 @@ public class Transaction {
         //passar os dados para o ficheiro
 
 
-        try {
-            BufferedWriter out = new BufferedWriter(new FileWriter((scanner.next())+".txt"));
-            out.write(PK + "\n");
-            out.write(montante + "\n");
-            out.write(PKD);
+       // try {
+            //BufferedWriter out = new BufferedWriter(new FileWriter((scanner.next())+".txt"));
+            //out.write(PK + "\n");
+            //out.write(montante + "\n");
+            //out.write(PKD);
             //Assinar o ficheiro e enviar para o servidor
             //sign(out, PKI,Sign);
 
 
 
 
-        }
-        catch (IOException e){
-            System.out.println("Exception ");
+        //}
+        //catch (IOException e){
+          //  System.out.println("Exception ");
 
-        }
+        //}
 
 
 

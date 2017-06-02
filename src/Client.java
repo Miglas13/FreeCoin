@@ -1,9 +1,12 @@
+import sun.misc.BASE64Decoder;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Scanner;
 import java.sql.Connection;
@@ -97,6 +100,71 @@ public class Client {
         }
     }
 
+
+    public static PrivateKey stringToPrivateKey(String s) {
+
+        BASE64Decoder decoder = new BASE64Decoder();
+        byte[] c = null;
+        KeyFactory keyFact = null;
+        PrivateKey returnKey = null;
+
+        try {
+
+            c = decoder.decodeBuffer(s);
+            keyFact = KeyFactory.getInstance("DSA", "SUN");
+        } catch (Exception e) {
+
+            System.out.println("Error in first try catch of stringToPrivateKey");
+            e.printStackTrace();
+        }
+
+
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(c);
+        try {   //the next line causes the crash
+            returnKey = keyFact.generatePrivate(x509KeySpec);
+        } catch (Exception e) {
+
+            System.out.println("Error in stringToPrivateKey");
+            e.printStackTrace();
+        }
+
+        return returnKey;
+
+    }
+
+
+    public static void sign(File out, String pk, File sig) throws FileNotFoundException {
+        try {
+            FileOutputStream sign = new FileOutputStream(sig);
+            PrivateKey priv = stringToPrivateKey(pk);
+            Signature dsa = Signature.getInstance("SHA1withECDSA");
+            dsa.initSign(priv);
+            FileInputStream fis = new FileInputStream(out);
+            BufferedInputStream bufin = new BufferedInputStream(fis);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = bufin.read(buffer)) >= 0) {
+                dsa.update(buffer, 0, len);
+            }
+
+            bufin.close();
+            byte[] realSig = dsa.sign();
+
+            // Save signature
+            sign.write(realSig);
+            sign.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
+    }
+
+
+
     public static void Transation(String user){
 
 
@@ -113,6 +181,44 @@ public class Client {
             PKD= Server.getPubKey(destinatario);
             System.out.println("Qual o montante que pretende transferir?");
             montante= (scanner.nextInt());
+
+            File sk= new File("C:\\Users\\Rui Santos\\IdeaProjects\\FreeCoin\\FreeCoin\\"+ nome + ".txt");
+            FileInputStream fis = null;
+            String secretKey = "";
+            String linha= "\n";
+
+            try {
+                File file = new File("fich.txt");
+                FileOutputStream f = new FileOutputStream(file);
+                f.write(PK.getBytes());
+                f.write(linha.getBytes());
+                f.write(PKD.getBytes());
+                f.write(linha.getBytes());
+                f.write(montante);
+
+                fis = new FileInputStream(sk);
+                int content;
+                while ((content = fis.read()) != -1) {
+                     // convert to char and display it
+                    secretKey += (char) content;
+                }
+
+
+
+
+                File filename = new File(user + destinatario+".sign");
+                FileOutputStream signa = new FileOutputStream(filename);
+
+                //Assinar o ficheiro e enviar para o servidor
+
+                sign(file,secretKey,filename);
+
+
+            }
+            catch (IOException e){
+              System.out.println("Exception ");
+
+            }
 
 
 

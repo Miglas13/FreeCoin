@@ -1,3 +1,5 @@
+import sun.misc.IOUtils;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.net.ServerSocket;
@@ -7,6 +9,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.sql.PreparedStatement;
 
@@ -152,6 +158,83 @@ public class Server{
             e.printStackTrace();
         }
         return transacao;
+    }
+
+    public static int verifyTransaction(String nomeFich){
+         final DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+         final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
+        List<String> records = new ArrayList<String>();
+        String pubKey, pubKeyD;
+        int mont=0;
+
+        LocalDate localDate = LocalDate.now();
+        System.out.println(DateTimeFormatter.ofPattern("yyy/MM/dd").format(localDate));
+        try
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(nomeFich));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                records.add(line);
+            }
+            reader.close();
+            pubKey=records.get(0);
+            pubKeyD=records.get(2);
+            mont = Integer.getInteger(records.get(4));
+
+
+            Connection connection = connect();
+            try {
+                String sql2= "Select count(*) from users where pubkey = " + pubKey;
+                String sql10 = "Select username from users where pubkey = " + pubKey;
+                String sql3= "Select count(*) from users where pubkey = " + pubKeyD;
+                String sql4= "Select coins from users where pubkey = " + pubKey;
+                String sql6= "Select coins from users where pubkey = " + pubKeyD;
+                PreparedStatement preparedStatement = connection.prepareStatement(sql2);
+                ResultSet rs = preparedStatement.executeQuery();
+                if(rs.getInt(0) ==1){
+                    preparedStatement=connection.prepareStatement(sql3);
+                    rs=preparedStatement.executeQuery();
+                    if (rs.getInt(0)==1){
+                        preparedStatement=connection.prepareStatement(sql4);
+                        rs=preparedStatement.executeQuery();
+                        int coinsEmissor= rs.getInt(0);
+                        if (rs.getInt(0)>= mont){
+
+                            String sql5= "Update users set coins =" + (coinsEmissor-mont);
+                            preparedStatement=connection.prepareStatement(sql5);
+                            preparedStatement.executeUpdate();
+                            preparedStatement=connection.prepareStatement(sql6);
+                            rs=preparedStatement.executeQuery();
+                            int coinsDest = rs.getInt(0);
+                            String sql7= "Update users set coins = " + (coinsDest+mont);
+                            preparedStatement=connection.prepareStatement(sql7);
+                            preparedStatement.executeUpdate();
+                            preparedStatement=connection.prepareStatement(sql10);
+                            rs=preparedStatement.executeQuery();
+                            String user=rs.getString(0);
+                            String sql8= "Insert into transactions ( username, PK_Emissor, PK_Receptor, coins, Data ) values(user, pubKey, pubKeyD, mont, localDate)";
+                            preparedStatement=connection.prepareStatement(sql8);
+                            rs=preparedStatement.executeQuery();
+                        }
+
+                    }
+
+
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+        catch (Exception e)
+        {
+            System.err.format("Exception occurred trying to read '%s'.", nomeFich);
+            e.printStackTrace();
+
+        }
+
+        return 0;
     }
 
     public static String bitRandom(int x){
