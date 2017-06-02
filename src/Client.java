@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -197,7 +198,7 @@ public class Client {
             try {
                 File file = new File("fich.txt");
                 FileOutputStream f = new FileOutputStream(file);
-                f.write(PK.getBytes());
+                f.write(PK.getBytes() + "\n");
                 f.write(linha.getBytes());
                 f.write(PKD.getBytes());
                 f.write(linha.getBytes());
@@ -313,7 +314,8 @@ public class Client {
         }
 
         //guardar a chave no pc do user
-        String filename = nome+".pk";
+        //Aqui a extensão é sk porque em inglês é secret key, se não, confunde-se
+        String filename = nome+".sk";
         try (PrintStream out = new PrintStream(new FileOutputStream(filename))) {
             out.print(priv.toString());
         } catch (FileNotFoundException e) {
