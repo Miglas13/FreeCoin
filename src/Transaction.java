@@ -9,9 +9,7 @@ import java.util.Scanner;
 public class Transaction {
 
 
-    Socket socket= null;
-
-    public static void sign(File out, File pk, File sign){
+    public static void sign(File out, String pk, File sign){
 
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -54,25 +52,7 @@ public class Transaction {
 
     public static  void main (String argv[]) throws IOException {
 
-        String destinatario = "";
-        int montante=0;
-        String PK, SK, PKD, SKD;
 
-        Scanner scanner = new Scanner(System.in);
-
-
-        System.out.println("Insira a sua chave pública");
-        PK= (scanner.next());
-        System.out.println("Insira o destinatário");
-        destinatario=(scanner.next());
-
-        System.out.println("Qual o montante que pretende transferir?");
-        montante= (scanner.nextInt());
-
-        System.out.println("Insira a chave pública do destinatário");
-        PKD= (scanner.next());
-
-        System.out.println("Insira o nome do ficheiro");
 
         //passar os dados para o ficheiro
 
@@ -83,7 +63,7 @@ public class Transaction {
             out.write(montante + "\n");
             out.write(PKD);
             //Assinar o ficheiro e enviar para o servidor
-            sign(out, PKI,Sign);
+            //sign(out, PKI,Sign);
 
 
 

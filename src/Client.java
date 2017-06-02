@@ -80,6 +80,7 @@ public class Client {
     public static void challenge(){
 
         Socket socket = null;
+
         try {
             socket = new Socket(SERVER,SOCKET_PORT_BRPOADCAST);
             System.out.println("Connecting...");
@@ -94,6 +95,31 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void Transation(String user){
+
+
+
+            String destinatario = "";
+            int montante=0;
+            String PK, SK, PKD, SKD, username;
+
+            Scanner scanner = new Scanner(System.in);
+            PK = Server.getPubKey(user);
+            System.out.println("Chave publica do user: "+ PK);
+            System.out.println("Insira o username destinatário");
+            destinatario=(scanner.next());
+            PKD= Server.getPubKey(destinatario);
+            System.out.println("Qual o montante que pretende transferir?");
+            montante= (scanner.nextInt());
+
+
+
+
+
+
+
     }
 
     public static void intro(){

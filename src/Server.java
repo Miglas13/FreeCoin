@@ -7,16 +7,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.UUID;
+import java.util.*;
 import java.sql.PreparedStatement;
 
 
 public class Server{
 
-    static final String dbName = "/home/frederico/IdeaProjects/FreeCoin/src/frbased.db";
+    static final String dbName = "C:\\Users\\Rui Santos\\IdeaProjects\\FreeCoin\\FreeCoin\\src\\frbased.db";
 
     public String serverRequest = "none";
     private Socket socket = null;
@@ -101,12 +98,69 @@ public class Server{
         return -1;
     }
 
+    public static String getPubKey(String username){
+        String sql = "Select pubkey from user where username = "+ username;
+        Connection connection = connect();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            return rs.getString(2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Not exists in database";
+    }
+
+    public static List<String> getMyTransactions(String username){
+        String sql = "Select pubkey from user where username = "+ username;
+        String pubKey="";
+        List<String> transacao= new ArrayList<String>();
+        Connection connection = connect();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            pubKey= rs.getString(2);
+
+            String sql2= "Select * from transations where PK_Emissor = " + pubKey + " or PK_Receptor = " + pubKey;
+            preparedStatement=connection.prepareStatement(sql2);
+            rs=preparedStatement.executeQuery();
+            while(rs.next()){
+                transacao.add(rs.getInt(0) +";" + rs.getString(1) + ";" + rs.getString(2)+";"+
+                        rs.getInt(3) + ";" + rs.getDate(4));
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transacao;
+    }
+
+    public static List<String> getAllTransactions(){
+
+        List<String> transacao= new ArrayList<String>();
+        Connection connection = connect();
+        try {
+            String sql2= "Select * from transations ";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql2);
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                transacao.add(rs.getInt(0) +";" + rs.getString(1) + ";" + rs.getString(2)+";"+
+                        rs.getInt(3) + ";" + rs.getDate(4));
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transacao;
+    }
+
     public static String bitRandom(int x){
         Random rg = new Random();
         int n = rg.nextInt(x);
         System.out.println(n);
         return Integer.toBinaryString(n);
     }
+
 
     //return -1 caso não consiga vencer o challenge
     //return 1 caso consiga vencer o challenge
@@ -182,6 +236,7 @@ public class Server{
                 ", PK_Emissor   TEXT NOT NULL" +
                 ", PK_Receptor  TEXT NOT NULL" +
                 ", coins    INTEGER NOT NULL" +
+                ", Data      Date not null" +
                 ")";
 
         try (
