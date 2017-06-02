@@ -172,6 +172,57 @@ public class Client {
     }
 
 
+    public static void signAvancada(File out, String userEm, String userDest, File sig) throws FileNotFoundException {
+        try {
+            FileOutputStream sign = new FileOutputStream(sig);
+            PrivateKey privEm=null;
+            String pubkeyEm = "";
+            PrivateKey privDes=null;
+            String pubkeyDes = "";
+
+            KeyPairGenerator keyGen = null;
+            try {
+                keyGen = KeyPairGenerator.getInstance("EC");
+                SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+                keyGen.initialize(256, random);
+                KeyPair pair = keyGen.generateKeyPair();
+                privEm = pair.getPrivate();
+                PublicKey pub = pair.getPublic();
+                pubkeyEm = pub.toString();
+                //System.out.println(pub.toString());
+
+            }
+
+
+            Signature dsa = Signature.getInstance("SHA1withECDSA");
+            dsa.initSign(privEm);
+            FileInputStream fis = new FileInputStream(out);
+            BufferedInputStream bufin = new BufferedInputStream(fis);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = bufin.read(buffer)) >= 0) {
+                dsa.update(buffer, 0, len);
+            }
+
+            bufin.close();
+            byte[] realSig = dsa.sign();
+
+            // Save signature
+            sign.write(realSig);
+            sign.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+    }
+
+
 
     public static void Transation(String user){
 
@@ -198,7 +249,7 @@ public class Client {
             try {
                 File file = new File("fich.txt");
                 FileOutputStream f = new FileOutputStream(file);
-                f.write(PK.getBytes() + "\n");
+                f.write(PK.getBytes());
                 f.write(linha.getBytes());
                 f.write(PKD.getBytes());
                 f.write(linha.getBytes());
@@ -249,6 +300,23 @@ public class Client {
                 break;
             case 2:
                 Registo();
+                break;
+        }
+
+    }
+
+    public static void intro2(){
+        System.out.println("FR€coin\n\n1 - REALIZAR TRANSAÇAO:\n2 - VERIFICAR AS SUAS TRANSAÇÕES:\n");
+
+        Scanner sc = new Scanner(System.in);
+        int opt = sc.nextInt();
+
+        switch (opt) {
+            case 1:
+                Transation(nome);
+                break;
+            case 2:
+                Server.getMyTransactions(nome);
                 break;
         }
 
