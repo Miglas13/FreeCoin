@@ -294,10 +294,15 @@ public class Client {
 
                 String filename=user + destinatario+".sign";
                 System.out.println("Aqqqq3");
+                //cifrar file
+
+                String key= "Não sejas Inácio";
+                File encrypt= new File(filename+".encrypt");
+                CryptoUtils.encrypt(key, "fich.txt", encrypt);
 
                 //Assinar o ficheiro e enviar para o servidor
 
-                signAvancada(file,secretKey,filename);
+                signAvancada(encrypt,secretKey,filename);
                 System.out.println("Aqqqq4");
                 Server.verifyTransaction(user+destinatario+".sign", PK, PKD, montante);
                 System.out.println("Aqqqq5");
