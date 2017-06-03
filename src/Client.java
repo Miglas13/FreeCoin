@@ -95,9 +95,9 @@ public class Client {
     }
 
     public static void main(String[] args){
-        intro();
-        intro2();
-        //challenge();
+        //intro();
+        //intro2();
+        challenge();
     }
 
 
