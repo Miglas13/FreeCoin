@@ -97,7 +97,7 @@ public class Client {
     public static void main(String[] args){
         intro();
         intro2();
-        challenge();
+        //challenge();
     }
 
 
@@ -345,7 +345,7 @@ public class Client {
     }
 
     public static void intro2(){
-        System.out.println("FR€coin\n\n1 - REALIZAR TRANSAÇAO:\n2 - VERIFICAR AS SUAS TRANSAÇÕES:\n");
+        System.out.println("FR€coin\n\n1 - REALIZAR TRANSAÇAO:\n2 - VERIFICAR AS SUAS TRANSAÇÕES:\n3 - CHALLENGE:");
 
         Scanner sc = new Scanner(System.in);
         int opt = sc.nextInt();
@@ -356,6 +356,9 @@ public class Client {
                 break;
             case 2:
                 Server.getMyTransactions(nome);
+                break;
+            case 3:
+                challenge();
                 break;
         }
 
@@ -535,7 +538,7 @@ public class Client {
             nome = username;
             System.out.println("Utilizador autenticado com sucesso!\nBem-vindo(a) " + username);
             intro2();
-            challenge();
+            //challenge();
         }
         else{
             System.err.println("Autenticação sem sucesso!\n");

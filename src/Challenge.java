@@ -16,7 +16,7 @@ public class Challenge extends TimerTask {
 
     public void run(){
         int x = Server.numUtilizadores();
-        if (x==-1)  s = 1;
+        if (x==-1)  s = 2;
         else{
             if ((x/2)%2==0) {
                 s = (x / 2);
