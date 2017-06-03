@@ -112,11 +112,16 @@ public class Client {
             Scanner scanner = new Scanner(System.in);
             String s = scanner.nextLine();
             if (s.equals("y")){
+                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataOutputStream.writeUTF("y");
                 challenge(socket);
                 intro2();
             }
-            else
+            else{
+                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataOutputStream.writeUTF("n");
                 intro2();
+            }
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {

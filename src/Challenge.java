@@ -12,7 +12,7 @@ public class Challenge extends TimerTask {
     public Challenge(Socket connected){
         this.connected = connected;
     }
-    public int s = 1;
+    public int s = 2;
 
     public void run(){
         int x = Server.numUtilizadores();
