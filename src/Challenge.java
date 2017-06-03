@@ -15,13 +15,13 @@ public class Challenge extends TimerTask {
     public int s = 2;
 
     public void run(){
-       /* int x = Server.numUtilizadores();
+        int x = Server.numUtilizadores();
         if (x==-1)  s = 2;
         else{
             if ((x/2)%2==0) {
                 s = (x / 2);
             }
-        }*/
+        }
         Server.bitNumber = Server.bitRandom(s);
         int number = Integer.parseInt(Server.bitNumber);
         byte[] message = Integer.toBinaryString(number).getBytes();
