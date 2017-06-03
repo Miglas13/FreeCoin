@@ -551,6 +551,36 @@ public class Server{
 
     }
 
+    public static int VerifyDups(String pessoa){
+
+        String sql = "SELECT username FROM user where username = ? ;";
+        int verify=0;
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setString(1,pessoa);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            // loop through the result set
+            if(rs.getString("username").isEmpty()==false) {
+                verify = 1;
+            }
+            else{
+                verify = 0;
+            }
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return verify;
+
+    }
+
     public static int VerifyAuth(int id, byte[] nounce, String username, String pw, String lastHash){
 
         String HashedPassword = getHash(username);
