@@ -66,7 +66,7 @@ public class Server{
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
-            return rs.getInt(0);
+            return rs.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
