@@ -24,6 +24,7 @@ public class Challenge extends TimerTask {
         }
         Server.bitNumber = Server.bitRandom(s);
         int number = Integer.parseInt(Server.bitNumber);
+        System.out.println(Server.bitNumber);
         byte[] message = Integer.toBinaryString(number).getBytes();
         //Escreve isto apenas para teste. Deve ser removido no fim para Server.bitNumber.getBytes();
         DataOutputStream dataOutputStream = null;
