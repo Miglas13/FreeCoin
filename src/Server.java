@@ -5,9 +5,7 @@ import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -168,6 +166,51 @@ public class Server{
         return transacao;
     }
 
+
+    public static void signAvancadaServer(String in, String siga) throws FileNotFoundException {
+        try {
+            File out= new File(in);
+            File sig = new File(siga);
+            FileOutputStream sign = new FileOutputStream(sig);
+            PrivateKey privServer = null;
+            String pubkeyServer = "";
+
+            KeyPairGenerator keyGen = null;
+
+            keyGen = KeyPairGenerator.getInstance("EC");
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            keyGen.initialize(256, random);
+            KeyPair pair = keyGen.generateKeyPair();
+            privServer = pair.getPrivate();
+
+            PublicKey pub = pair.getPublic();
+            pubkeyServer = pub.toString();
+
+            //System.out.println(pub.toString());
+            Signature dsa = Signature.getInstance("SHA1withECDSA");
+            dsa.initSign(privServer);
+            FileInputStream fis = new FileInputStream(out);
+            BufferedInputStream bufin = new BufferedInputStream(fis);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = bufin.read(buffer)) >= 0) {
+                dsa.update(buffer, 0, len);
+            }
+
+            bufin.close();
+            byte[] realSig = dsa.sign();
+
+            // Save signature
+            sign.write(realSig);
+            sign.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     public static int verifyTransaction(String nomeFich, String PK, String PKD, int montante){
          final DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
          final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -201,12 +244,12 @@ public class Server{
                         rs=preparedStatement.executeQuery();
                         int coinsEmissor= rs.getInt(1);
                         if (rs.getInt(1)>= montante){
-
+                            signAvancadaServer(nomeFich, "Server" + nomeFich);
                             preparedStatement=connection.prepareStatement(sql10);
                             preparedStatement.setString(1,PK);
                             rs=preparedStatement.executeQuery();
                             String user=rs.getString(1);
-                            String sql5= "Update user set coins = ? where username = ?" + (coinsEmissor-montante);
+                            String sql5= "Update user set coins = ? where username = ?" ;
                             preparedStatement=connection.prepareStatement(sql5);
                             preparedStatement.setInt(1,(coinsEmissor-montante));
                             preparedStatement.setString(2,user);
