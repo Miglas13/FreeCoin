@@ -109,7 +109,10 @@ public class Server{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1,user);
             ResultSet rs = preparedStatement.executeQuery();
-            return rs.getString(1);
+            String pubKey=rs.getString(1);
+            preparedStatement.close();
+            rs.close();
+            return pubKey;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -270,7 +273,7 @@ public class Server{
                             preparedStatement.setString(3,PKD);
                             preparedStatement.setInt(4,montante);
                             preparedStatement.setString(5,data);
-                            rs=preparedStatement.executeQuery();
+                            preparedStatement.executeUpdate();
                             preparedStatement.close();
                             rs.close();
                         }
@@ -373,6 +376,7 @@ public class Server{
 
         String sql1 = "CREATE TABLE IF NOT EXISTS transactions (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT" +
+                ", username TEXT NOT NULL"+
                 ", PK_Emissor   TEXT NOT NULL" +
                 ", PK_Receptor  TEXT NOT NULL" +
                 ", coins    INTEGER NOT NULL" +
