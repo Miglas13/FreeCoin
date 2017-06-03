@@ -278,7 +278,7 @@ public class Server{
 
     //return -1 caso não consiga vencer o challenge
     //return 1 caso consiga vencer o challenge
-    public static void challengeAnswer(Socket socket) throws IOException {
+    public static void challengeAnswer(Socket socket, String number) throws IOException {
         int bytesRead;
         int current = 0;
         FileOutputStream fos = null;
@@ -316,9 +316,9 @@ public class Server{
                 }
                 String binary = hextoBin(sb.toString());
                 System.out.println(binary);
-                System.out.println(bitNumber);
-                for (int i=0; i < bitNumber.length(); i++){
-                    if (bitNumber.charAt(i) == binary.charAt(i)){
+                System.out.println(number);
+                for (int i=0; i < number.length(); i++){
+                    if (number.charAt(i) == binary.charAt(i)){
                         continue;
                     }else {
                         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -453,7 +453,7 @@ public class Server{
                 DataInputStream dataInputStream = new DataInputStream(connected.getInputStream());
                 String s = dataInputStream.readUTF();
                 System.out.println(s);
-                if (s.equals("y"))        challengeAnswer(connected);
+                if (s.equals("y"))        challengeAnswer(connected,s);
                 else continue;
             }
         } catch (Exception e) {
