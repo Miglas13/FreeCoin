@@ -421,8 +421,12 @@ public class Server{
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 ResultSet resultSet = pstmt.executeQuery();
                 int coins = resultSet.getInt("coins");
+                resultSet.close();
+                pstmt.close();
+                conn.close();
                 String sql1 = "Update user set coins = ? where username = ? ";
-                PreparedStatement preparedStatement = conn.prepareStatement(sql1);
+                Connection connection = connect();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql1);
                 preparedStatement.setInt(1,(coins + 1));
                 preparedStatement.setString(2,nome);
                 preparedStatement.executeUpdate();
