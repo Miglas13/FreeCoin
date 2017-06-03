@@ -41,7 +41,7 @@ public class Client {
                 OutputStream outputStream = socket.getOutputStream();
                 int count;
                 while ((count = inputStream.read(bytes))>0){
-                    outputStream.write(bytes,0,count);
+                    dataOutputStream.write(bytes,0,count);
                 }
                 System.out.println("File sent!");
                 byte[] bytes1 = new byte[10];
@@ -95,9 +95,9 @@ public class Client {
     }
 
     public static void main(String[] args){
-        intro();
-        intro2();
-        //challenge();
+        //intro();
+        //intro2();
+        challenge();
     }
 
 
@@ -112,14 +112,10 @@ public class Client {
             Scanner scanner = new Scanner(System.in);
             String s = scanner.nextLine();
             if (s.equals("y")){
-                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                dataOutputStream.writeUTF("y");
                 challenge(socket);
                 intro2();
             }
             else{
-                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                dataOutputStream.writeUTF("n");
                 intro2();
             }
         } catch (UnknownHostException e) {
