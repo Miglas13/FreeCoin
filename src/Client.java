@@ -24,7 +24,7 @@ public class Client {
     public final static int SOCKET_PORT = 13267;
     public final static int SOCKET_PORT_BRPOADCAST = 13268;
     public final static String SERVER = "127.0.0.1";
-    public static String nome = null;
+    public static String nome = "teste";
 
     public static void solveChallenge(int binary, Socket socket){
         try {
@@ -32,27 +32,31 @@ public class Client {
             Scanner scanner = new Scanner(System.in);
             String file_to_send = scanner.nextLine();
             File file = new File(file_to_send);
-            long length = file.length();
-            byte[] bytes = new byte[16*1024];
-            InputStream inputStream = new FileInputStream(file);
-            OutputStream outputStream = socket.getOutputStream();
-            int count;
-            while ((count = inputStream.read(bytes))>0){
-                outputStream.write(bytes,0,count);
-            }
-            System.out.println("File sent!");
-            byte[] bytes1 = new byte[10];
-            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-            int number = dataInputStream.readInt();
-            if (number == 1){
-                System.out.println("Boa! Conseguiste uma coin!");
-                String sql = "UPDATE user" +
-                        "SET coins = " +
-                        "(SELECT coins FROM user WHERE username = " +
-                        nome + ")" +
-                        " + 1"; //falta corrigir o erro de sintaxe do sql
-                Server.updatebd(sql);
-                // TODO: 01-06-2017 Enviar sql para o Server e inserir na BD
+            if (file.exists() && !file.isDirectory()){
+                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataOutputStream.writeUTF("1");
+                long length = file.length();
+                byte[] bytes = new byte[16*1024];
+                InputStream inputStream = new FileInputStream(file);
+                OutputStream outputStream = socket.getOutputStream();
+                int count;
+                while ((count = inputStream.read(bytes))>0){
+                    outputStream.write(bytes,0,count);
+                }
+                System.out.println("File sent!");
+                byte[] bytes1 = new byte[10];
+                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                int number = dataInputStream.readInt();
+                if (number == 1){
+                    Server.updatebd(nome);
+                }else {
+                    System.out.println("Falhaste o desafio. Desculpa...");
+                }
+            }else{
+                System.out.println("Ficheiro não existe.\n" +
+                        "Challenge terminado. Sorry...\n");
+                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataOutputStream.writeUTF("Wrong File");
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -67,15 +71,22 @@ public class Client {
             dataInputStream = new DataInputStream(socket.getInputStream());
             int length = dataInputStream.readInt();
             if (length>0) {
+                System.out.println(length);
                 byte[] message = new byte[length];
-                dataInputStream.readFully(message, 0, message.length);
+                dataInputStream.read(message);
                 String s = new String(message,"US-ASCII");
                 System.out.println(s);
                 System.out.println("Deseja resolver o challenge [y/n]?");
                 Scanner scanner = new Scanner(System.in);
                 String a = scanner.nextLine();
                 if(a.equals("y")){
-                    solveChallenge(Integer.parseInt(a),socket);
+                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                    dataOutputStream.writeUTF("y");
+                    solveChallenge(Integer.parseInt(s),socket);
+                }else{
+                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                    dataOutputStream.writeUTF("n");
+                    socket.close();
                 }
             }
         } catch (IOException e) {
@@ -84,9 +95,9 @@ public class Client {
     }
 
     public static void main(String[] args){
-        intro();
-        intro2();
-
+        //intro();
+        //intro2();
+        challenge();
     }
 
 
@@ -280,14 +291,6 @@ public class Client {
                         System.out.println(sCurrentLine);
                         secretKey=sCurrentLine;
                     }
-
-
-                //System.out.println("Aqqqqteste");
-                //System.out.println("Aqqqq");
-
-
-
-                //System.out.println("Aqqqq2");
 
                 String filename=user + destinatario+".sign";
                 System.out.println("Aqqqq3");

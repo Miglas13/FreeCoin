@@ -15,16 +15,16 @@ public class Challenge extends TimerTask {
     public int s = 1;
 
     public void run(){
-        /*int x = Server.numUtilizadores();
+        int x = Server.numUtilizadores();
         if (x==-1)  s = 1;
         else{
             if ((x/2)%2==0) {
                 s = (x / 2);
-            } // TODO: 01-06-2017 FRED VÊ ESTA MERDA SE FOR Nº IMPAR SE ESTÀ A RETORNAR O QUE ESTAVA ANTES
-        }*/
-        Server.bitNumber = "1010";
+            }
+        }
+        Server.bitNumber = Server.bitRandom(s);
+        byte[] message = Integer.toBinaryString(s).getBytes();
         //Escreve isto apenas para teste. Deve ser removido no fim para Server.bitNumber.getBytes();
-        byte[] message = Integer.toBinaryString(10).getBytes();
         DataOutputStream dataOutputStream = null;
         try {
             dataOutputStream = new DataOutputStream(connected.getOutputStream());

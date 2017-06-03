@@ -29,7 +29,8 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="sqlite-jdbc-3.18.01" level="project" />
-    <orderEntry type="library" name="sqlite-jdbc-3.18.02" level="project" />
-    <orderEntry type="library" name="sqlite-jdbc-3.18.03" level="project" />
+    <orderEntry type="library" name="sqlite-jdbc-3.5.8" level="application" />
+    <orderEntry type="library" name="sqlite-jdbc-3.5.8 (2)" level="project" />
+    <orderEntry type="library" name="sqlite-jdbc-3.5.81" level="application" />
   </component>
 </module>

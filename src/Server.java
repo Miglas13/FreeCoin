@@ -19,7 +19,7 @@ import java.sql.PreparedStatement;
 
 public class Server{
 
-    static final String dbName = "C:\\Users\\Rui Santos\\IdeaProjects\\FreeCoin\\FreeCoin\\src\\frbased.db";
+    static final String dbName = "frbased.db";
 
     public String serverRequest = "none";
     private Socket socket = null;
@@ -31,9 +31,9 @@ public class Server{
     public final static int SOCKET_PORT = 13267;
     public final static int SOCKET_PORT_BROADCAST = 13268;
     public final static String SERVER = "127.0.0.1";  
-    public final static String FILE_TO_RECEIVED = "src/downloaded.txt";    // TODO: 20-05-2017  tem de se alterar isto para correr em windows também
+    public final static String FILE_TO_RECEIVED = "src/downloaded.txt";
 
-    public final static int FILE_SIZE = 6022386;    // TODO: 20-05-2017 verificar se este tamanho está correcto
+    public final static int FILE_SIZE = 6022386;
     public UUID serverThreadID;
     private int maxLocalRetries;
 
@@ -42,38 +42,9 @@ public class Server{
         this.killList = killList;
         this.serverActions = serverActions;
     }
-
-
-
-    //Todo
-
-    //// TODO: 18/05/2017 Fred fica com as primeiras duas funcionalidades basicas e curvas elipticas
-    //// TODO: 18/05/2017 Rui faz 4ª simples e 1ª avançada
-    //// TODO: 18/05/2017 Barbara 4ªavançada
-    //// TODO: 18/05/2017 André 5ªsimples e 3ªavançada
-
-    //// TODO: 18/05/2017  Guardar password é efetuada com o calculo do hash 1024 ou 2048 vezes + salt
-
-    // TODO: 17-05-2017 Criar Classe das Message para ver se determinado documento está assinado, etc.
-    
-    public void send(String msg, byte[] signature){
-        // TODO: 17-05-2017 StandBy
-    }
-
     public void sendEncrypted(String msg, String keyIndex){
-        String encripted= null;     // TODO: 17-05-2017 Acrescentar a classe do DeterministicDSA e fazer a chamada do encrypt - return encripted
+        String encripted= null;
     }
-
-    // TODO: 17-05-2017 Verificar Assinaturas
-    // TODO: 17-05-2017 Assinar e enviar 
-    // TODO: 17-05-2017 Guardar transações SQL 
-    // TODO: 17-05-2017 Criar moedas, tamos pobres 
-
-
-    // TODO: 17-05-2017 Do lado do utilizador: 
-    // TODO: 17-05-2017 Gerar chaves DSA
-    // TODO: 17-05-2017 login 
-    // TODO: 17-05-2017 só sabe as suas transações
 
     static String hextoBin(String s){
         return new BigInteger(s,16).toString(2);
@@ -254,14 +225,13 @@ public class Server{
     public static String bitRandom(int x){
         Random rg = new Random();
         int n = rg.nextInt(x);
-        System.out.println(n);
+        System.out.println("Number: " + Integer.toBinaryString(n));
         return Integer.toBinaryString(n);
     }
 
 
     //return -1 caso não consiga vencer o challenge
     //return 1 caso consiga vencer o challenge
-    // TODO: 20-05-2017 Substituir o return por uma nova coin dada ao user - Enviar mensagem para o utilizador especifico 
     public static void challengeAnswer(Socket socket) throws IOException {
         int bytesRead;
         int current = 0;
@@ -272,39 +242,47 @@ public class Server{
             OutputStream outputStream = new FileOutputStream(FILE_TO_RECEIVED);
             byte[] bytes = new byte[16*1024];
             int count;
-            count = inputStream.read(bytes);
-            System.out.println("TOPKEK!");
-            System.out.println(count);
-            System.out.println(bytes.toString());
-            outputStream.write(bytes,0,count);
-            System.out.println("Received File!");
-            System.out.println("Checking");
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            FileInputStream fis = new FileInputStream(FILE_TO_RECEIVED);
-            byte[] dataBytes = new byte[FILE_SIZE];
-            int nread = 0;
-            while ((nread = fis.read(dataBytes))!=-1){
-                md.update(dataBytes,0,nread);
-            }
-            byte[] mdBytes = md.digest();
-            StringBuffer sb = new StringBuffer();
-            for (int i=0; i < mdBytes.length; i++){
-                sb.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-            String binary = hextoBin(sb.toString());
-            System.out.println(binary);
-            System.out.println(bitNumber);
-            for (int i=0; i < bitNumber.length(); i++){
-                if (bitNumber.charAt(i) == binary.charAt(i)){
-                    continue;
-                }else {
-                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                    dataOutputStream.writeInt(-1);
-                    return;
+            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+            String s = dataInputStream.readUTF();
+            if (s.equals("Wrong File")){
+                System.out.println("User introduziu mal o ficheiro.\n" +
+                        "Terminate --- Kill challenge for user");
+                return;
+            }else if (s.equals("1")){
+                count = inputStream.read(bytes);
+                System.out.println("TOPKEK!");
+                System.out.println(count);
+                System.out.println(bytes.toString());
+                outputStream.write(bytes,0,count);
+                System.out.println("Received File!");
+                System.out.println("Checking");
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                FileInputStream fis = new FileInputStream(FILE_TO_RECEIVED);
+                byte[] dataBytes = new byte[FILE_SIZE];
+                int nread = 0;
+                while ((nread = fis.read(dataBytes))!=-1){
+                    md.update(dataBytes,0,nread);
                 }
+                byte[] mdBytes = md.digest();
+                StringBuffer sb = new StringBuffer();
+                for (int i=0; i < mdBytes.length; i++){
+                    sb.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
+                }
+                String binary = hextoBin(sb.toString());
+                System.out.println(binary);
+                System.out.println(bitNumber);
+                for (int i=0; i < bitNumber.length(); i++){
+                    if (bitNumber.charAt(i) == binary.charAt(i)){
+                        continue;
+                    }else {
+                        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                        dataOutputStream.writeInt(-1);
+                        return;
+                    }
+                }
+                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataOutputStream.writeInt(1);
             }
-            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            dataOutputStream.writeInt(1);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -390,10 +368,21 @@ public class Server{
 
 
 
-    public static void updatebd(String sql){
+    public static void updatebd(String nome){
+        String sql = "SELECT coins FROM user where username = ? ;";
         try (Connection conn = connect()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.executeUpdate();
+                ResultSet resultSet = pstmt.executeQuery();
+                int coins = resultSet.getInt("coins");
+                String sql1 = "Update user set coins = ? where username = ? ";
+                PreparedStatement preparedStatement = conn.prepareStatement(sql1);
+                preparedStatement.setInt(1,(coins + 1));
+                preparedStatement.setString(2,nome);
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+                resultSet.close();
+                pstmt.close();
+                conn.close();
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -410,7 +399,11 @@ public class Server{
                 System.out.println("Connecting...");
                 Timer timer = new Timer();
                 timer.schedule(new Challenge(connected),0,30000);       //Increasing for testing. Final Version needs to be rescaled to 30000
-                challengeAnswer(connected);
+                DataInputStream dataInputStream = new DataInputStream(connected.getInputStream());
+                String s = dataInputStream.readUTF();
+                System.out.println(s);
+                if (s.equals("y"))        challengeAnswer(connected);
+                else continue;
             }
         } catch (Exception e) {
             e.printStackTrace();
