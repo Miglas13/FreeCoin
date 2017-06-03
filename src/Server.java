@@ -5,9 +5,7 @@ import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -82,7 +80,10 @@ public class Server{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1,user);
             ResultSet rs = preparedStatement.executeQuery();
-            return rs.getString(1);
+            String pubKey=rs.getString(1);
+            preparedStatement.close();
+            rs.close();
+            return pubKey;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -139,6 +140,51 @@ public class Server{
         return transacao;
     }
 
+
+    public static void signAvancadaServer(String in, String siga) throws FileNotFoundException {
+        try {
+            File out= new File(in);
+            File sig = new File(siga);
+            FileOutputStream sign = new FileOutputStream(sig);
+            PrivateKey privServer = null;
+            String pubkeyServer = "";
+
+            KeyPairGenerator keyGen = null;
+
+            keyGen = KeyPairGenerator.getInstance("EC");
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            keyGen.initialize(256, random);
+            KeyPair pair = keyGen.generateKeyPair();
+            privServer = pair.getPrivate();
+
+            PublicKey pub = pair.getPublic();
+            pubkeyServer = pub.toString();
+
+            //System.out.println(pub.toString());
+            Signature dsa = Signature.getInstance("SHA1withECDSA");
+            dsa.initSign(privServer);
+            FileInputStream fis = new FileInputStream(out);
+            BufferedInputStream bufin = new BufferedInputStream(fis);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = bufin.read(buffer)) >= 0) {
+                dsa.update(buffer, 0, len);
+            }
+
+            bufin.close();
+            byte[] realSig = dsa.sign();
+
+            // Save signature
+            sign.write(realSig);
+            sign.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     public static int verifyTransaction(String nomeFich, String PK, String PKD, int montante){
          final DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
          final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -172,12 +218,12 @@ public class Server{
                         rs=preparedStatement.executeQuery();
                         int coinsEmissor= rs.getInt(1);
                         if (rs.getInt(1)>= montante){
-
+                            signAvancadaServer(nomeFich, "Server" + nomeFich);
                             preparedStatement=connection.prepareStatement(sql10);
                             preparedStatement.setString(1,PK);
                             rs=preparedStatement.executeQuery();
                             String user=rs.getString(1);
-                            String sql5= "Update user set coins = ? where username = ?" + (coinsEmissor-montante);
+                            String sql5= "Update user set coins = ? where username = ?" ;
                             preparedStatement=connection.prepareStatement(sql5);
                             preparedStatement.setInt(1,(coinsEmissor-montante));
                             preparedStatement.setString(2,user);
@@ -198,7 +244,7 @@ public class Server{
                             preparedStatement.setString(3,PKD);
                             preparedStatement.setInt(4,montante);
                             preparedStatement.setString(5,data);
-                            rs=preparedStatement.executeQuery();
+                            preparedStatement.executeUpdate();
                             preparedStatement.close();
                             rs.close();
                         }
@@ -308,6 +354,7 @@ public class Server{
 
         String sql1 = "CREATE TABLE IF NOT EXISTS transactions (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT" +
+                ", username TEXT NOT NULL"+
                 ", PK_Emissor   TEXT NOT NULL" +
                 ", PK_Receptor  TEXT NOT NULL" +
                 ", coins    INTEGER NOT NULL" +
@@ -494,6 +541,36 @@ public class Server{
             System.out.println(e.getMessage());
         }
         return hash;
+
+    }
+
+    public static int VerifyDups(String pessoa){
+
+        String sql = "SELECT username FROM user where username = ? ;";
+        int verify=0;
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setString(1,pessoa);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            // loop through the result set
+            if(rs.getString("username").isEmpty()==false) {
+                verify = 1;
+            }
+            else{
+                verify = 0;
+            }
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return verify;
 
     }
 

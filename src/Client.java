@@ -353,9 +353,21 @@ public class Client {
 
     public static void Registo(){
 
-        System.out.println("Insira um nome para Login:\n");
         Scanner sc = new Scanner(System.in);
-        nome = sc.nextLine();
+
+        int noDups=0;
+        do {
+            System.out.println("Insira um nome para Login:\n");
+
+            nome = sc.nextLine();
+
+            noDups = Server.VerifyDups(nome);
+            if (noDups != 0)
+                System.out.println("Esse username já existe!\nTente outra vez");
+
+        }
+        while(noDups!=0);
+
 
         System.out.println("Insira uma password:\n");
         String pass = sc.nextLine();
@@ -412,6 +424,7 @@ public class Client {
 
         //guardar a chave no pc do user
         //Aqui a extensão é sk porque em inglês é secret key, se não, confunde-se
+
         String filename = nome+".sk";
         try (PrintStream out = new PrintStream(new FileOutputStream(filename))) {
             out.print(priv.toString());
@@ -520,8 +533,6 @@ public class Client {
         }
 
     }
-
-    //TODO corrigir o erro de sintaxe do sql, ainda nao consegui
 
 
 }
