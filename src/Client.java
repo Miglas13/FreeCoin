@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -84,6 +85,7 @@ public class Client {
 
     public static void main(String[] args){
         intro();
+        intro2();
 
     }
 
@@ -141,8 +143,9 @@ public class Client {
     }
 
 
-    public static void sign(File out, String pk, File sig) throws FileNotFoundException {
+    public static void sign(File out, String pk, String siga) throws FileNotFoundException {
         try {
+            File sig = new File(siga);
             FileOutputStream sign = new FileOutputStream(sig);
             PrivateKey priv = stringToPrivateKey(pk);
             Signature dsa = Signature.getInstance("SHA1withECDSA");
@@ -172,42 +175,52 @@ public class Client {
     }
 
 
-    public static void signAvancada(File out, String userEm, String userDest, File sig) throws FileNotFoundException {
+    public static void signAvancada(File out, String userEm, String siga) throws FileNotFoundException {
         try {
+            File sig = new File(siga);
             FileOutputStream sign = new FileOutputStream(sig);
             PrivateKey privEm = null;
             String pubkeyEm = "";
-            PrivateKey privDes = null;
-            String pubkeyDes = "";
 
             KeyPairGenerator keyGen = null;
 
-                keyGen = KeyPairGenerator.getInstance("EC");
-                SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-                keyGen.initialize(256, random);
-                KeyPair pair = keyGen.generateKeyPair();
-                privEm = pair.getPrivate();
-                PublicKey pub = pair.getPublic();
-                pubkeyEm = pub.toString();
+            keyGen = KeyPairGenerator.getInstance("EC");
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            keyGen.initialize(256, random);
+            KeyPair pair = keyGen.generateKeyPair();
+            privEm = pair.getPrivate();
+            String filename= userEm + ".sk";
+            File f = new File(filename);
+            f.delete();
+
+            String filename2 = userEm+".sk";
+            try (PrintStream out2 = new PrintStream(new FileOutputStream(filename))) {
+                out2.print(privEm.toString());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            PublicKey pub = pair.getPublic();
+            pubkeyEm = pub.toString();
+
+            Server.updatePubKey(userEm,pubkeyEm);
                 //System.out.println(pub.toString());
+            Signature dsa = Signature.getInstance("SHA1withECDSA");
+            dsa.initSign(privEm);
+            FileInputStream fis = new FileInputStream(out);
+            BufferedInputStream bufin = new BufferedInputStream(fis);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = bufin.read(buffer)) >= 0) {
+                dsa.update(buffer, 0, len);
+            }
 
+            bufin.close();
+            byte[] realSig = dsa.sign();
 
-                Signature dsa = Signature.getInstance("SHA1withECDSA");
-                dsa.initSign(privEm);
-                FileInputStream fis = new FileInputStream(out);
-                BufferedInputStream bufin = new BufferedInputStream(fis);
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = bufin.read(buffer)) >= 0) {
-                    dsa.update(buffer, 0, len);
-                }
-
-                bufin.close();
-                byte[] realSig = dsa.sign();
-
-                // Save signature
-                sign.write(realSig);
-                sign.close();
+            // Save signature
+            sign.write(realSig);
+            sign.close();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -236,37 +249,52 @@ public class Client {
             System.out.println("Qual o montante que pretende transferir?");
             montante= (scanner.nextInt());
 
-            File sk= new File("C:\\Users\\Rui Santos\\IdeaProjects\\FreeCoin\\FreeCoin\\"+ nome + ".txt");
-            FileInputStream fis = null;
+            String sk= "C:\\Users\\Rui Santos\\IdeaProjects\\FreeCoin\\FreeCoin\\"+ nome + ".sk";
+
             String secretKey = "";
             String linha= "\n";
 
             try {
                 File file = new File("fich.txt");
                 FileOutputStream f = new FileOutputStream(file);
-                f.write(PK.getBytes());
-                f.write(linha.getBytes());
-                f.write(PKD.getBytes());
-                f.write(linha.getBytes());
-                f.write(montante);
-
-                fis = new FileInputStream(sk);
-                int content;
-                while ((content = fis.read()) != -1) {
-                     // convert to char and display it
-                    secretKey += (char) content;
-                }
+                Writer w = new OutputStreamWriter(f, "UTF-8");
+                w.write(PK + "\n");
+                w.write(PKD + "\n");
+                w.write(montante+"\n");
+                System.out.println("Aqqqqsdfsdgvzv");
+                BufferedReader br = null;
+                FileReader fr = null;
 
 
+                    fr = new FileReader(sk);
+                    br = new BufferedReader(fr);
+
+                    String sCurrentLine;
+
+                    br = new BufferedReader(new FileReader(sk));
+
+                    while ((sCurrentLine = br.readLine()) != null) {
+                        System.out.println(sCurrentLine);
+                        secretKey=sCurrentLine;
+                    }
 
 
-                File filename = new File(user + destinatario+".sign");
-                FileOutputStream signa = new FileOutputStream(filename);
+                //System.out.println("Aqqqqteste");
+                //System.out.println("Aqqqq");
+
+
+
+                //System.out.println("Aqqqq2");
+
+                String filename=user + destinatario+".sign";
+                System.out.println("Aqqqq3");
 
                 //Assinar o ficheiro e enviar para o servidor
 
-                sign(file,secretKey,filename);
-                Server.verifyTransaction(user+destinatario+".sign");
+                signAvancada(file,secretKey,filename);
+                System.out.println("Aqqqq4");
+                Server.verifyTransaction(user+destinatario+".sign", PK, PKD, montante);
+                System.out.println("Aqqqq5");
 
 
             }
@@ -477,6 +505,7 @@ public class Client {
         if(verify == 1){
             nome = username;
             System.out.println("Utilizador autenticado com sucesso!\nBem-vindo(a) " + username);
+            intro2();
             challenge();
         }
         else{
