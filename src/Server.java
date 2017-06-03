@@ -228,6 +228,8 @@ public class Server{
                             preparedStatement.setInt(4,montante);
                             preparedStatement.setString(5,data);
                             rs=preparedStatement.executeQuery();
+                            preparedStatement.close();
+                            rs.close();
                         }
 
                     }
@@ -368,10 +370,10 @@ public class Server{
     public static void updatePubKey(String user, String pubKey){
 
         Connection conn =connect();
-        try
+        try( PreparedStatement ps = conn.prepareStatement("UPDATE user SET pubkey = ? WHERE username = ? "))
         {
             // create our java preparedstatement using a sql update query
-            PreparedStatement ps = conn.prepareStatement("UPDATE user SET pubkey = ? WHERE username = ? ");
+
 
             // set the preparedstatement parameters
             ps.setString(1,pubKey);
@@ -379,6 +381,7 @@ public class Server{
 
             // call executeUpdate to execute our sql update statement
             ps.executeUpdate();
+            ps.close();
 
         } catch (SQLException e1) {
             e1.printStackTrace();

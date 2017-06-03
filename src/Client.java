@@ -102,7 +102,10 @@ public class Client {
             String s = scanner.nextLine();
             if (s.equals("y")){
                 challenge(socket);
+                intro2();
             }
+            else
+                intro2();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
