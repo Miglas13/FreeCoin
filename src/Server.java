@@ -233,22 +233,25 @@ public class Server{
                 PreparedStatement preparedStatement = connection.prepareStatement(sql2);
                 preparedStatement.setString(1,PK);
                 ResultSet rs = preparedStatement.executeQuery();
+                System.out.println(rs.getInt(1));
                 if(rs.getInt(1) ==1){
                     preparedStatement=connection.prepareStatement(sql3);
                     preparedStatement.setString(1,PKD);
                     rs=preparedStatement.executeQuery();
+                    System.out.println(rs.getInt(1));
                     if (rs.getInt(1)==1){
                         preparedStatement=connection.prepareStatement(sql4);
                         preparedStatement.setString(1,PK);
                         rs=preparedStatement.executeQuery();
                         int coinsEmissor= rs.getInt(1);
+                        System.out.println(coinsEmissor);
                         if (coinsEmissor>= montante){
                             signAvancadaServer(nomeFich, "Server" + nomeFich);
                             preparedStatement=connection.prepareStatement(sql10);
                             preparedStatement.setString(1,PK);
                             rs=preparedStatement.executeQuery();
                             String user=rs.getString(1);
-                            System.out.println(user);
+                            System.out.println(user + "aqui");
                             preparedStatement.close();
                             rs.close();
                             String sql5= "Update user set coins = ? where username = ?;" ;

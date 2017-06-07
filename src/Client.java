@@ -220,7 +220,7 @@ public class Client {
             PublicKey pub = pair.getPublic();
             pubkeyEm = pub.toString();
 
-            //Server.updatePubKey(userEm,pubkeyEm);
+            Server.updatePubKey(userEm,pubkeyEm);
             System.out.println(privEm);
             Signature dsa = Signature.getInstance("SHA1withECDSA");
             dsa.initSign(privEm);
@@ -322,6 +322,7 @@ public class Client {
 
                 signAvancada(encrypt,user,filename);
                 System.out.println("Aqqqq4");
+                PK= Server.getPubKey(user);
                 Server.verifyTransaction(user+destinatario+".sign", PK, PKD, montante, destinatario);
                 System.out.println("Aqqqq5");
 
