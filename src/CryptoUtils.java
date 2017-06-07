@@ -25,7 +25,7 @@ public class CryptoUtils {
     }
 
     private static void doCrypto(int cipherMode, String key, File inputFile, File outputFile) {
-        System.out.println("isto");
+
         try {
             Key secretKey = new SecretKeySpec(key.getBytes(), ALGORITHM);
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);

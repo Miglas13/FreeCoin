@@ -48,12 +48,14 @@ public class Client {
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                 int number = dataInputStream.readInt();
                 if (number == 1){
-                    Server.updatebd(nome);
+                    System.out.println("Ganhaste uma coin");
+                    System.out.println(Server.getMyCoins(nome)+1);
+                    Server.updatebd(nome,Server.getMyCoins(nome)+1);
                 }else {
                     System.out.println("Falhaste o desafio. Desculpa...");
                 }
             }else{
-                System.out.println("Ficheiro não existe.\n" +
+                System.out.println("Ficheiro não existe.\n" + //home/frederico/IdeaProjects/FreeCoin/src/text.txt
                         "Challenge terminado. Sorry...\n");
                 DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataOutputStream.writeUTF("Wrong File");
@@ -313,7 +315,7 @@ public class Client {
                 System.out.println("Aqqqq3");
                 //cifrar file
 
-                String key= "1234567890abcdef1234567890abcdef";
+                String key= "Bar12345Bar12345";
                 String encrypt = "/home/frederico/IdeaProjects/FreeCoin/" + user + destinatario+".encrypt";
 
                 CryptoUtils.encrypt(key, "fich.txt", encrypt);
@@ -369,10 +371,10 @@ public class Client {
                 Transation(nome);
                 break;
             case 2:
-                Server.getMyTransactions(nome);
+                System.out.println(Server.getMyTransactions(nome));
                 break;
             case 3:
-                System.out.println("O cliente " + nome + "tem na sua conta "  + Server.getMyCoins(nome) + "coins.");
+                System.out.println("O cliente " + nome + "tem na sua conta "  + Server.getMyCoins(nome) + " coin(s).");
                 break;
             case 4:
                 challenge();

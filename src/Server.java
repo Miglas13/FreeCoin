@@ -102,8 +102,7 @@ public class Server{
             preparedStatement.setString(1, user);
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()){
-                transacao.add(rs.getInt(0) +";" + rs.getString(1) + ";" + rs.getString(2)+";"+
-                        rs.getInt(3) + ";" + rs.getDate(4));
+                transacao.add(rs.getString(2) + ";" + rs.getString(3)+";");
 
             }
             preparedStatement.close();
@@ -194,11 +193,15 @@ public class Server{
             pstmt.setString(1,user);
             //
             ResultSet rs  = pstmt.executeQuery();
+            pstmt.close();
+
 
             // loop through the result set
             while (rs.next()) {
                 coin = rs.getInt("coins");
             }
+            rs.close();
+            conn.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -462,27 +465,55 @@ public class Server{
     }
 
 
+    public static void updatebd(String nome, int coins){
 
+        Connection conn=connect();
+
+        try {
+
+            // create our java preparedstatement using a sql update query
+            String query="UPDATE user SET coins = ? WHERE username = ? ;";
+
+            PreparedStatement pstmt2 = conn.prepareStatement(query);
+            // set the preparedstatement parameters
+            pstmt2.setInt(1,coins);
+            pstmt2.setString(2,nome);
+            pstmt2.executeUpdate();
+            pstmt2.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+/*
     public static void updatebd(String nome){
         String sql = "SELECT coins FROM user where username = ? ;";
         try (Connection conn = connect()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1,nome);
                 ResultSet resultSet = pstmt.executeQuery();
+               // resultSet.close();
+                pstmt.close();
                 int coins = resultSet.getInt("coins");
                 String sql1 = "Update user set coins = ? where username = ? ;";
-                PreparedStatement preparedStatement = conn.prepareStatement(sql1);
-                preparedStatement.setInt(1,(coins + 1));
-                preparedStatement.setString(2,nome);
-                preparedStatement.executeUpdate();
-                preparedStatement.close();
-                resultSet.close();
+                pstmt = conn.prepareStatement(sql1);
+                int newcoins = coins+1;
+                pstmt.setInt(1,newcoins); //alterei de coins+1
+                pstmt.setString(2,nome);
+                pstmt.executeUpdate();
                 pstmt.close();
+                //resultSet.close();
                 conn.close();
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
+
+   */
 
     public static void main(String[] args) throws IOException {
         createDB(Server.dbName);
