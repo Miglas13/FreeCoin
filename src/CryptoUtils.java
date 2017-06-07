@@ -15,7 +15,7 @@ public class CryptoUtils {
     public static void encrypt(String key, String inputFile, String outputFile) {
         File input= new File(inputFile);
         File output= new File(outputFile);
-        System.out.println("Entrei");
+        //System.out.println("Entrei");
         doCrypto(Cipher.ENCRYPT_MODE, key, input, output);
     }
 
@@ -31,7 +31,7 @@ public class CryptoUtils {
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             cipher.init(cipherMode, secretKey);
 
-            System.out.println("Estou aqui no Cryptho");
+            //System.out.println("Estou aqui no Cryptho");
             FileInputStream inputStream = new FileInputStream(inputFile);
             byte[] inputBytes = new byte[(int) inputFile.length()];
             inputStream.read(inputBytes);

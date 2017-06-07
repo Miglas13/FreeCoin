@@ -66,7 +66,10 @@ public class Server{
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
-            return rs.getInt(1);
+            int utilizadores=rs.getInt(1);
+            preparedStatement.close();
+            rs.close();
+            return utilizadores;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -91,7 +94,7 @@ public class Server{
     }
 
     public static List<String> getMyTransactions(String user){
-        System.out.println(user);
+        //System.out.println(user);
 
         List<String> transacao= new ArrayList<String>();
         Connection connection = connect();
@@ -193,15 +196,11 @@ public class Server{
             pstmt.setString(1,user);
             //
             ResultSet rs  = pstmt.executeQuery();
+            coin = rs.getInt(1);
             pstmt.close();
 
 
-            // loop through the result set
-            while (rs.next()) {
-                coin = rs.getInt("coins");
-            }
-            rs.close();
-            conn.close();
+           rs.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -236,31 +235,31 @@ public class Server{
                 PreparedStatement preparedStatement = connection.prepareStatement(sql2);
                 preparedStatement.setString(1,PK);
                 ResultSet rs = preparedStatement.executeQuery();
-                System.out.println(rs.getInt(1));
+                //System.out.println(rs.getInt(1));
                 if(rs.getInt(1) ==1){
                     preparedStatement=connection.prepareStatement(sql3);
                     preparedStatement.setString(1,PKD);
                     rs=preparedStatement.executeQuery();
-                    System.out.println(rs.getInt(1));
+                    //System.out.println(rs.getInt(1));
                     if (rs.getInt(1)==1){
                         preparedStatement=connection.prepareStatement(sql4);
                         preparedStatement.setString(1,PK);
                         rs=preparedStatement.executeQuery();
                         int coinsEmissor= rs.getInt(1);
-                        System.out.println(coinsEmissor);
+                        //System.out.println(coinsEmissor);
                         if (coinsEmissor>= montante){
                             signAvancadaServer(nomeFich, "Server" + nomeFich);
                             preparedStatement=connection.prepareStatement(sql10);
                             preparedStatement.setString(1,PK);
                             rs=preparedStatement.executeQuery();
                             String user=rs.getString(1);
-                            System.out.println(user + "aqui");
+                            //System.out.println(user + "aqui");
                             preparedStatement.close();
                             rs.close();
                             String sql5= "Update user set coins = ? where username = ?;" ;
                             preparedStatement=connection.prepareStatement(sql5);
                             preparedStatement.setInt(1,(coinsEmissor-montante));
-                            System.out.println((coinsEmissor-montante));
+                            //System.out.println((coinsEmissor-montante));
                             preparedStatement.setString(2,user);
                             preparedStatement.executeUpdate();
                             preparedStatement.close();
@@ -271,7 +270,7 @@ public class Server{
                             String sql7= "Update user set coins = ? where username= ? ;" ;
                             preparedStatement=connection.prepareStatement(sql7);
                             preparedStatement.setInt(1,(coinsDest+montante));
-                            System.err.println((coinsDest+montante));
+                            //System.err.println((coinsDest+montante));
                             preparedStatement.setString(2,destinatario);
                             preparedStatement.executeUpdate();
                             preparedStatement.close();
@@ -316,7 +315,7 @@ public class Server{
     public static String bitRandom(int x){
         Random rg = new Random();
         int n = rg.nextInt(x);
-        System.out.println("Number: " + Integer.toBinaryString(n));
+        //System.out.println("Number: " + Integer.toBinaryString(n));
         return Integer.toBinaryString(n);
     }
 
@@ -341,9 +340,9 @@ public class Server{
                 return;
             }else if (s.equals("1")){
                 count = inputStream.read(bytes);
-                System.out.println("TOPKEK!");
-                System.out.println(count);
-                System.out.println(bytes.toString());
+                //System.out.println("TOPKEK!");
+                //System.out.println(count);
+                //System.out.println(bytes.toString());
                 outputStream.write(bytes,0,count);
                 System.out.println("Received File!");
                 System.out.println("Checking");
@@ -360,8 +359,8 @@ public class Server{
                     sb.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
                 }
                 String binary = hextoBin(sb.toString());
-                System.out.println(binary);
-                System.out.println(bitNumber);
+                //System.out.println(binary);
+                //System.out.println(bitNumber);
                 for (int i=0; i < bitNumber.length(); i++){
                     if (bitNumber.charAt(i) == binary.charAt(i)){
                         continue;
@@ -413,6 +412,7 @@ public class Server{
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
             statement.execute(sql);
             statement.execute(sql1);
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -444,8 +444,8 @@ public class Server{
         try
         {
 
-            System.err.println(users);
-            System.err.println(pubKey);
+            //System.err.println(users);
+            //System.err.println(pubKey);
 
             Connection conn=connect();
             // create our java preparedstatement using a sql update query
@@ -467,12 +467,13 @@ public class Server{
 
     public static void updatebd(String nome, int coins){
 
-        Connection conn=connect();
+
 
         try {
+            Connection conn=connect();
 
             // create our java preparedstatement using a sql update query
-            String query="UPDATE user SET coins = ? WHERE username = ? ;";
+            String query="UPDATE user SET coins = ? WHERE username = ? ";
 
             PreparedStatement pstmt2 = conn.prepareStatement(query);
             // set the preparedstatement parameters
@@ -488,32 +489,7 @@ public class Server{
     }
 
 
-/*
-    public static void updatebd(String nome){
-        String sql = "SELECT coins FROM user where username = ? ;";
-        try (Connection conn = connect()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1,nome);
-                ResultSet resultSet = pstmt.executeQuery();
-               // resultSet.close();
-                pstmt.close();
-                int coins = resultSet.getInt("coins");
-                String sql1 = "Update user set coins = ? where username = ? ;";
-                pstmt = conn.prepareStatement(sql1);
-                int newcoins = coins+1;
-                pstmt.setInt(1,newcoins); //alterei de coins+1
-                pstmt.setString(2,nome);
-                pstmt.executeUpdate();
-                pstmt.close();
-                //resultSet.close();
-                conn.close();
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
 
-   */
 
     public static void main(String[] args) throws IOException {
         createDB(Server.dbName);
@@ -587,10 +563,13 @@ public class Server{
             //
             ResultSet rs  = pstmt.executeQuery();
 
+
             // loop through the result set
             while (rs.next()) {
                 hash = rs.getString("pass");
             }
+            pstmt.close();
+            rs.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -616,6 +595,8 @@ public class Server{
             while (rs.next()) {
                 hash = rs.getString("salt");
             }
+            pstmt.close();
+            rs.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -644,7 +625,8 @@ public class Server{
                 verify = 0;
             }
 
-
+            pstmt.close();
+            rs.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -676,7 +658,7 @@ public class Server{
         digest = md.digest();
         HashToVerify = String.format("%064x", new java.math.BigInteger(1, digest));
 
-        System.err.println("Hash calculado do lado do servidor = " + HashToVerify);
+        //System.err.println("Hash calculado do lado do servidor = " + HashToVerify);
 
         if(HashToVerify.equals(lastHash)){
             return 1;

@@ -43,16 +43,16 @@ public class Client {
                 while ((count = inputStream.read(bytes))>0){
                     dataOutputStream.write(bytes,0,count);
                 }
-                System.out.println("File sent!");
+                //System.out.println("File sent!");
                 byte[] bytes1 = new byte[10];
                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                 int number = dataInputStream.readInt();
                 if (number == 1){
                     System.out.println("Ganhaste uma coin");
-                    System.out.println(Server.getMyCoins(nome)+1);
-                    Server.updatebd(nome,Server.getMyCoins(nome)+1);
+                    System.out.println("Tens agora " + (Server.getMyCoins(nome)+1) + " coins." );
+                    Server.updatebd(nome,(Server.getMyCoins(nome)+1));
                 }else {
-                    System.out.println("Falhaste o desafio. Desculpa...");
+                    System.out.println("Falhaste o desafio. Desculpa...\n");
                 }
             }else{
                 System.out.println("Ficheiro não existe.\n" + //home/frederico/IdeaProjects/FreeCoin/src/text.txt
@@ -73,11 +73,11 @@ public class Client {
             dataInputStream = new DataInputStream(socket.getInputStream());
             int length = dataInputStream.readInt();
             if (length>0) {
-                System.out.println(length);
+                //System.out.println(length);
                 byte[] message = new byte[length];
                 dataInputStream.read(message);
                 String s = new String(message,"US-ASCII");
-                System.out.println(s);
+                //System.out.println(s);
                 System.out.println("Deseja resolver o challenge [y/n]?");
                 Scanner scanner = new Scanner(System.in);
                 String a = scanner.nextLine();
@@ -199,7 +199,7 @@ public class Client {
             FileOutputStream sign = new FileOutputStream(sig);
             PrivateKey privEm = null;
             String pubkeyEm = "";
-            System.out.println(userEm);
+            //System.out.println(userEm);
 
             KeyPairGenerator keyGen = null;
 
@@ -223,7 +223,7 @@ public class Client {
             pubkeyEm = pub.toString();
 
             Server.updatePubKey(userEm,pubkeyEm);
-            System.out.println(privEm);
+            //System.out.println(privEm);
             Signature dsa = Signature.getInstance("SHA1withECDSA");
             dsa.initSign(privEm);
             FileInputStream fis = new FileInputStream(out);
@@ -267,15 +267,15 @@ public class Client {
 
             Scanner scanner = new Scanner(System.in);
             PK = Server.getPubKey(user);
-            System.out.println("Chave publica do user: "+ PK);
-            System.out.println("Insira o username destinatário");
+            //System.out.println("Chave publica do user: "+ PK);
+            System.out.println("Insira o username do destinatário:");
             destinatario=(scanner.next());
             PKD= Server.getPubKey(destinatario);
             System.out.println("Qual o montante que pretende transferir?");
             montante= (scanner.nextInt());
 
             String sk= "/home/frederico/IdeaProjects/FreeCoin/"+ nome + ".sk";
-            System.out.println(sk);
+            //System.out.println(sk);
 
             String secretKey = "";
             String linha= "\n";
@@ -291,28 +291,28 @@ public class Client {
                 PrintStream out = new PrintStream(new FileOutputStream(file));
                 out.print(PK.toString() + "\n" + PKD.toString() + "\n" + montante + "\n" );
 
-                System.out.println("Aqqqqsdfsdgvzv");
+                //System.out.println("Aqqqqsdfsdgvzv");
                 BufferedReader br = null;
                 FileReader fr = null;
 
 
                fr = new FileReader(sk);
                br = new BufferedReader(fr);
-               System.out.println("ois");
+               //System.out.println("ois");
 
                     String sCurrentLine;
 
                     br = new BufferedReader(new FileReader(sk));
 
-                System.out.println("ois");
+                //System.out.println("ois");
                     while ((sCurrentLine = br.readLine()) != null) {
-                        System.out.println(sCurrentLine);
+                        //System.out.println(sCurrentLine);
                         secretKey=sCurrentLine;
                     }
-                System.out.println("oi1");
+                //System.out.println("oi1");
 
                 String filename=user + destinatario+".sign";
-                System.out.println("Aqqqq3");
+                //System.out.println("Aqqqq3");
                 //cifrar file
 
                 String key= "Bar12345Bar12345";
@@ -323,10 +323,10 @@ public class Client {
                 //Assinar o ficheiro e enviar para o servidor
 
                 signAvancada(encrypt,user,filename);
-                System.out.println("Aqqqq4");
+                //System.out.println("Aqqqq4");
                 PK= Server.getPubKey(user);
                 Server.verifyTransaction(user+destinatario+".sign", PK, PKD, montante, destinatario);
-                System.out.println("Aqqqq5");
+                //System.out.println("Aqqqq5");
 
 
             }
@@ -334,12 +334,6 @@ public class Client {
               System.out.println("Exception ");
 
             }
-
-
-
-
-
-
 
     }
 
@@ -361,7 +355,7 @@ public class Client {
     }
 
     public static void intro2(){
-        System.out.println("FR€coin\n\n1 - REALIZAR TRANSAÇAO:\n2 - VERIFICAR AS SUAS TRANSAÇÕES:\n3 - VERIFICAR MINHA CONTA\n4 - CHALLENGE:");
+        System.out.println("FR€coin\n\n1 - REALIZAR TRANSAÇAO:\n2 - VERIFICAR AS SUAS TRANSAÇÕES:\n3 - VERIFICAR MINHA CONTA:\n4 - CHALLENGE:\n0 - SAIR");
 
         Scanner sc = new Scanner(System.in);
         int opt = sc.nextInt();
@@ -372,12 +366,18 @@ public class Client {
                 break;
             case 2:
                 System.out.println(Server.getMyTransactions(nome));
+                intro2();
                 break;
             case 3:
-                System.out.println("O cliente " + nome + "tem na sua conta "  + Server.getMyCoins(nome) + " coin(s).");
+                System.out.println("O cliente " + nome + " tem na sua conta "  + Server.getMyCoins(nome) + " coin(s).");
+                intro2();
                 break;
             case 4:
                 challenge();
+                break;
+            case 0:
+                nome="";
+                intro();
                 break;
         }
 
@@ -408,7 +408,7 @@ public class Client {
 
         //gerar salt
 
-        System.err.println(getNextSalt());
+        //System.err.println(getNextSalt());
 
         String sal = getNextSalt().toString();
 
@@ -505,10 +505,10 @@ public class Client {
         byte[] nounce = Server.getNounce();
         int id = Server.getId();
 
-        System.out.println("Nounce = "+nounce+"\nid = " +id);
+        //System.out.println("Nounce = "+nounce+"\nid = " +id);
 
         String salpassword = pw+Server.getSalt(username);
-        System.err.println("Sal e password = " + salpassword);
+        //System.err.println("Sal e password = " + salpassword);
 
 
         byte[] digest = null;
@@ -531,7 +531,7 @@ public class Client {
         firstHash = String.format("%064x", new java.math.BigInteger(1, digest));
 
         String toBeHashed = id+nounce.toString()+firstHash;
-        System.out.println("(concatenação id | nounce | (hash pass | salt)) = " + toBeHashed);
+        //System.out.println("(concatenação id | nounce | (hash pass | salt)) = " + toBeHashed);
 
         //calcular o valor de hash final para ser verificado no lado do servidor
 
@@ -550,7 +550,7 @@ public class Client {
         digest = md.digest();
         lastHash = String.format("%064x", new java.math.BigInteger(1, digest));
 
-        System.out.println("Hash enviado para o servidor = " + lastHash + "\n\n\n");
+        //System.out.println("Hash enviado para o servidor = " + lastHash + "\n\n\n");
 
         //verificar se são iguais
 
@@ -562,7 +562,7 @@ public class Client {
             //challenge();
         }
         else{
-            System.err.println("Autenticação sem sucesso!\n");
+            //System.err.println("Autenticação sem sucesso!\n");
             intro();
         }
 
