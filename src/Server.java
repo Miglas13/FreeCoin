@@ -17,7 +17,7 @@ import java.sql.PreparedStatement;
 
 public class Server{
 
-    static final String dbName = "frbased.db";
+    static final String dbName = "/home/frederico/IdeaProjects/FreeCoin/src/frbased.db";
 
     public String serverRequest = "none";
     private Socket socket = null;
@@ -50,7 +50,7 @@ public class Server{
 
     private static Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:src/frbased.db";
+        String url = "jdbc:sqlite:/home/frederico/IdeaProjects/FreeCoin/src/frbased.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -92,28 +92,22 @@ public class Server{
 
     public static List<String> getMyTransactions(String user){
         System.out.println(user);
-        String sql = "Select pubkey from users where username = ?";
-        String pubKey="";
+
         List<String> transacao= new ArrayList<String>();
         Connection connection = connect();
+        String sql2= "Select * from transactions where username = ? ;";
         try {
-            System.out.println("Aqui1");
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1,user);
-            System.out.println("Aqui2");
-            ResultSet rs = preparedStatement.executeQuery();
-            pubKey= rs.getString(2);
 
-            String sql2= "Select * from transations where PK_Emissor = ?  or PK_Receptor = ?";
-            preparedStatement=connection.prepareStatement(sql2);
-            preparedStatement.setString(1, pubKey);
-            preparedStatement.setString(2,pubKey);
-            rs=preparedStatement.executeQuery();
+            PreparedStatement preparedStatement= connection.prepareStatement(sql2);
+            preparedStatement.setString(1, user);
+            ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()){
                 transacao.add(rs.getInt(0) +";" + rs.getString(1) + ";" + rs.getString(2)+";"+
                         rs.getInt(3) + ";" + rs.getDate(4));
 
             }
+            preparedStatement.close();
+            rs.close();
         } catch (SQLException e) {
             System.out.println("Erro!!! Não tem transações");
 
@@ -185,7 +179,38 @@ public class Server{
 
     }
 
-    public static int verifyTransaction(String nomeFich, String PK, String PKD, int montante){
+
+    public  static int getMyCoins(String user){
+
+
+        String sql = "SELECT coins FROM user where username = ? ;";
+
+        int coin=0;
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt  = conn.prepareStatement(sql)){
+
+            // set the value
+            pstmt.setString(1,user);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            // loop through the result set
+            while (rs.next()) {
+                coin = rs.getInt("coins");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return coin;
+
+
+
+
+
+    }
+
+    public static int verifyTransaction(String nomeFich, String PK, String PKD, int montante, String destinatario){
          final DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
          final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
@@ -201,7 +226,7 @@ public class Server{
             Connection connection = connect();
             try {
                 String sql2= "Select count(*) from user where pubkey = ? ";
-                String sql10 = "Select username from user where pubkey = ?";
+                String sql10 ="Select username from user where pubkey = ?";
                 String sql3= "Select count(*) from user where pubkey = ?";
                 String sql4= "Select coins from user where pubkey = ?";
                 String sql6= "Select coins from user where pubkey = ?";
@@ -217,26 +242,33 @@ public class Server{
                         preparedStatement.setString(1,PK);
                         rs=preparedStatement.executeQuery();
                         int coinsEmissor= rs.getInt(1);
-                        if (rs.getInt(1)>= montante){
+                        if (coinsEmissor>= montante){
                             signAvancadaServer(nomeFich, "Server" + nomeFich);
                             preparedStatement=connection.prepareStatement(sql10);
                             preparedStatement.setString(1,PK);
                             rs=preparedStatement.executeQuery();
                             String user=rs.getString(1);
-                            String sql5= "Update user set coins = ? where username = ?" ;
+                            System.out.println(user);
+                            preparedStatement.close();
+                            rs.close();
+                            String sql5= "Update user set coins = ? where username = ?;" ;
                             preparedStatement=connection.prepareStatement(sql5);
                             preparedStatement.setInt(1,(coinsEmissor-montante));
+                            System.out.println((coinsEmissor-montante));
                             preparedStatement.setString(2,user);
                             preparedStatement.executeUpdate();
+                            preparedStatement.close();
                             preparedStatement=connection.prepareStatement(sql6);
                             preparedStatement.setString(1,PKD);
                             rs=preparedStatement.executeQuery();
                             int coinsDest = rs.getInt(1);
-                            String sql7= "Update user set coins =? where username= ? " ;
+                            String sql7= "Update user set coins = ? where username= ? ;" ;
                             preparedStatement=connection.prepareStatement(sql7);
                             preparedStatement.setInt(1,(coinsDest+montante));
-                            preparedStatement.setString(2,user);
+                            System.err.println((coinsDest+montante));
+                            preparedStatement.setString(2,destinatario);
                             preparedStatement.executeUpdate();
+                            preparedStatement.close();
                             String sql8= "Insert into transactions ( username, PK_Emissor, PK_Receptor, coins, Data ) values(?,?,?,?,?)";
                             preparedStatement=connection.prepareStatement(sql8);
                             preparedStatement.setString(1,user);
@@ -245,14 +277,21 @@ public class Server{
                             preparedStatement.setInt(4,montante);
                             preparedStatement.setString(5,data);
                             preparedStatement.executeUpdate();
+
                             preparedStatement.close();
                             rs.close();
                         }
+                        preparedStatement.close();
+                        rs.close();
 
                     }
+                    preparedStatement.close();
+                    rs.close();
 
 
                 }
+                preparedStatement.close();
+                rs.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -385,6 +424,7 @@ public class Server{
                 pstmt.setString(3, salt);
                 pstmt.setString(4, pub);
                 pstmt.executeUpdate();
+                pstmt.close();
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -392,21 +432,26 @@ public class Server{
     }
 
 
-    public static void updatePubKey(String user, String pubKey){
+    public static void updatePubKey(String users, String pubKey){
 
-        Connection conn =connect();
-        try( PreparedStatement ps = conn.prepareStatement("UPDATE user SET pubkey = ? WHERE username = ? "))
+
+        try
         {
-            // create our java preparedstatement using a sql update query
 
+            System.err.println(users);
+            System.err.println(pubKey);
+
+            Connection conn=connect();
+            // create our java preparedstatement using a sql update query
+            String query="UPDATE user SET pubkey = ? WHERE username = ? ;";
+            PreparedStatement pstmt = conn.prepareStatement(query);
 
             // set the preparedstatement parameters
-            ps.setString(1,pubKey);
-            ps.setString(2,user);
+            pstmt.setString(1,pubKey);
+            pstmt.setString(2,users);
+            pstmt.executeUpdate();
+            pstmt.close();
 
-            // call executeUpdate to execute our sql update statement
-            ps.executeUpdate();
-            ps.close();
 
         } catch (SQLException e1) {
             e1.printStackTrace();
@@ -421,12 +466,8 @@ public class Server{
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 ResultSet resultSet = pstmt.executeQuery();
                 int coins = resultSet.getInt("coins");
-                resultSet.close();
-                pstmt.close();
-                conn.close();
-                String sql1 = "Update user set coins = ? where username = ? ";
-                Connection connection = connect();
-                PreparedStatement preparedStatement = connection.prepareStatement(sql1);
+                String sql1 = "Update user set coins = ? where username = ? ;";
+                PreparedStatement preparedStatement = conn.prepareStatement(sql1);
                 preparedStatement.setInt(1,(coins + 1));
                 preparedStatement.setString(2,nome);
                 preparedStatement.executeUpdate();

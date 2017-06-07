@@ -190,12 +190,14 @@ public class Client {
     }
 
 
-    public static void signAvancada(File out, String userEm, String siga) throws FileNotFoundException {
+    public static void signAvancada(String outString, String userEm, String siga) throws FileNotFoundException {
         try {
+            File out = new File(outString);
             File sig = new File(siga);
             FileOutputStream sign = new FileOutputStream(sig);
             PrivateKey privEm = null;
             String pubkeyEm = "";
+            System.out.println(userEm);
 
             KeyPairGenerator keyGen = null;
 
@@ -209,7 +211,7 @@ public class Client {
             f.delete();
 
             String filename2 = userEm+".sk";
-            try (PrintStream out2 = new PrintStream(new FileOutputStream(filename))) {
+            try (PrintStream out2 = new PrintStream(new FileOutputStream(filename2))) {
                 out2.print(privEm.toString());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -218,8 +220,8 @@ public class Client {
             PublicKey pub = pair.getPublic();
             pubkeyEm = pub.toString();
 
-            Server.updatePubKey(userEm,pubkeyEm);
-                //System.out.println(pub.toString());
+            //Server.updatePubKey(userEm,pubkeyEm);
+            System.out.println(privEm);
             Signature dsa = Signature.getInstance("SHA1withECDSA");
             dsa.initSign(privEm);
             FileInputStream fis = new FileInputStream(out);
@@ -235,6 +237,12 @@ public class Client {
 
             // Save signature
             sign.write(realSig);
+
+/*
+            PrintStream writeBytes = new PrintStream(new FileOutputStream(siga));
+            writeBytes.print(realSig);
+*/
+
             sign.close();
 
             } catch (Exception e) {
@@ -264,48 +272,57 @@ public class Client {
             System.out.println("Qual o montante que pretende transferir?");
             montante= (scanner.nextInt());
 
-            String sk= "C:\\Users\\Rui Santos\\IdeaProjects\\FreeCoin\\FreeCoin\\"+ nome + ".sk";
+            String sk= "/home/frederico/IdeaProjects/FreeCoin/"+ nome + ".sk";
+            System.out.println(sk);
 
             String secretKey = "";
             String linha= "\n";
 
             try {
                 File file = new File("fich.txt");
-                FileOutputStream f = new FileOutputStream(file);
+                /*FileOutputStream f = new FileOutputStream(file);
                 Writer w = new OutputStreamWriter(f, "UTF-8");
                 w.write(PK + "\n");
                 w.write(PKD + "\n");
-                w.write(montante+"\n");
+                w.write(montante+"\n");*/
+
+                PrintStream out = new PrintStream(new FileOutputStream(file));
+                out.print(PK.toString() + "\n" + PKD.toString() + "\n" + montante + "\n" );
+
                 System.out.println("Aqqqqsdfsdgvzv");
                 BufferedReader br = null;
                 FileReader fr = null;
 
 
-                    fr = new FileReader(sk);
-                    br = new BufferedReader(fr);
+               fr = new FileReader(sk);
+               br = new BufferedReader(fr);
+               System.out.println("ois");
 
                     String sCurrentLine;
 
                     br = new BufferedReader(new FileReader(sk));
 
+                System.out.println("ois");
                     while ((sCurrentLine = br.readLine()) != null) {
                         System.out.println(sCurrentLine);
                         secretKey=sCurrentLine;
                     }
+                System.out.println("oi1");
 
                 String filename=user + destinatario+".sign";
                 System.out.println("Aqqqq3");
                 //cifrar file
 
-                String key= "Não sejas Inácio";
-                File encrypt= new File(filename+".encrypt");
+                String key= "1234567890abcdef1234567890abcdef";
+                String encrypt = "/home/frederico/IdeaProjects/FreeCoin/" + user + destinatario+".encrypt";
+
                 CryptoUtils.encrypt(key, "fich.txt", encrypt);
 
                 //Assinar o ficheiro e enviar para o servidor
 
-                signAvancada(encrypt,secretKey,filename);
+                signAvancada(encrypt,user,filename);
                 System.out.println("Aqqqq4");
-                Server.verifyTransaction(user+destinatario+".sign", PK, PKD, montante);
+                Server.verifyTransaction(user+destinatario+".sign", PK, PKD, montante, destinatario);
                 System.out.println("Aqqqq5");
 
 
@@ -341,7 +358,7 @@ public class Client {
     }
 
     public static void intro2(){
-        System.out.println("FR€coin\n\n1 - REALIZAR TRANSAÇAO:\n2 - VERIFICAR AS SUAS TRANSAÇÕES:\n3 - CHALLENGE:");
+        System.out.println("FR€coin\n\n1 - REALIZAR TRANSAÇAO:\n2 - VERIFICAR AS SUAS TRANSAÇÕES:\n3 - VERIFICAR MINHA CONTA\n4 - CHALLENGE:");
 
         Scanner sc = new Scanner(System.in);
         int opt = sc.nextInt();
@@ -354,6 +371,9 @@ public class Client {
                 Server.getMyTransactions(nome);
                 break;
             case 3:
+                System.out.println("O cliente " + nome + "tem na sua conta "  + Server.getMyCoins(nome) + "coins.");
+                break;
+            case 4:
                 challenge();
                 break;
         }
@@ -445,6 +465,8 @@ public class Client {
 
         //insert(nome, pass, sal, pubkey);
         Server.insert(nome, pass, sal, pubkey);
+        System.out.println("Utilizador registado com sucesso!");
+        intro();
 
 
     }

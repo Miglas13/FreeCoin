@@ -9,7 +9,6 @@ public final class CHAP
 
     //byte[] b = string.getBytes();
 
-    //o andre e lindo
 
     public static byte[] chapSHA256(byte id, byte[] Password, byte[] Challenge) throws NoSuchAlgorithmException
     {
